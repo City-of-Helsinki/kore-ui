@@ -3,12 +3,10 @@
 import _ from 'lodash';
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
-import {EventEmitter} from 'events';
+import BaseStore from './BaseStore';
 
-const CHANGE_EVENT = 'change';
 let _schools = {};
 let _fetchingData = false;
-
 
 const getSchoolByIdWrapper = function(func, defaultValue) {
   return function(schoolId) {
@@ -23,20 +21,7 @@ const getSchoolByIdWrapper = function(func, defaultValue) {
   };
 };
 
-
-const SchoolStore = Object.assign({}, EventEmitter.prototype, {
-  emitChange: function() {
-    this.emit(CHANGE_EVENT);
-  },
-
-  addChangeListener: function(callback) {
-    this.on(CHANGE_EVENT, callback);
-  },
-
-  removeChangeListener: function(callback) {
-    this.removeListener(CHANGE_EVENT, callback);
-  },
-
+const SchoolStore = Object.assign({}, BaseStore, {
   getFetchingData: function() {
     return _fetchingData;
   },
