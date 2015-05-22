@@ -7,9 +7,7 @@ import BaseStore from './BaseStore';
 let _schoolTimelineYear = null;
 
 const UIStore = Object.assign({}, BaseStore, {
-  getSchoolTimelineYear: function() {
-    return _schoolTimelineYear;
-  }
+  getSchoolTimelineYear
 });
 
 UIStore.dispatchToken = AppDispatcher.register(function(payload) {
@@ -31,6 +29,10 @@ UIStore.dispatchToken = AppDispatcher.register(function(payload) {
       // noop
   }
 });
+
+function getSchoolTimelineYear() {
+  return _schoolTimelineYear;
+}
 
 function _updateYear(year) {
   _schoolTimelineYear = year;
