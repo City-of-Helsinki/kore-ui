@@ -9,15 +9,12 @@ let _schools = {};
 let _fetchingData = false;
 
 const SchoolStore = Object.assign({}, BaseStore, {
-  calculateBeginAndEndYear,
-  getBuildings,
+  getBeginAndEndYear: _getSchoolByIdWrapper(getBeginAndEndYear, {}),
   getFetchingData,
-  getMainBuilding,
+  getMainBuilding: _getSchoolByIdWrapper(getMainBuilding, {}),
   getMainBuildingInYear,
-  getMainName,
-  getSchool,
-  getSchoolDetails,
-  getSchoolNames,
+  getMainName: _getSchoolByIdWrapper(getMainName, {}),
+  getSchoolDetails: _getSchoolByIdWrapper(getSchoolDetails, {}),
   getSchoolYearDetails,
   getSchools,
   hasSchool
@@ -49,29 +46,12 @@ SchoolStore.dispatchToken = AppDispatcher.register(function(payload) {
   }
 });
 
-const getBuildings = _getSchoolByIdWrapper(function(school) {
-  return _.sortBy(school.buildings, function(building) {
-    return -building.begin_year;
-  });
-});
-
-const getSchoolNames = _getSchoolByIdWrapper(function(school) {
-  return _.sortBy(school.names, function(name) {
-    return -name.begin_year;
-  });
-});
-
-function calculateBeginAndEndYear(schoolId) {
-  let sortedNames = getSchoolNames(schoolId);
-  let beginYear;
-  let endYear;
-  if (sortedNames.length) {
-    beginYear = sortedNames[sortedNames.length - 1].begin_year;
-    endYear = sortedNames[0].end_year;
-  }
+function getBeginAndEndYear(school) {
+  const currentName = _.first(school.names);
+  const oldestName = _.last(school.names);
   return {
-    beginYear: beginYear,
-    endYear: endYear
+    beginYear: oldestName ? oldestName.begin_year : null,
+    endYear: currentName ? currentName.end_year : null
   };
 }
 
@@ -79,47 +59,48 @@ function getFetchingData() {
   return _fetchingData;
 }
 
-function getMainBuilding(schoolId) {
-  let sortedBuildings = getBuildings(schoolId);
-  if (sortedBuildings.length) {
-    return sortedBuildings[0];
-  }
-  return {};
+function getMainBuilding(school) {
+  return _.first(school.buildings) || {};
 }
 
 function getMainBuildingInYear(schoolId, year) {
+  const school = _schools[schoolId];
+  if (_.isEmpty(school)) {
+    return {};
+  }
+
   if (!year) {
-    return getMainBuilding(schoolId);
+    return getMainBuilding(school);
   }
-  const buildings = getBuildings(schoolId);
-  const building = _.find(buildings, function(build) {
-    return build.begin_year <= year;
+
+  const mainBuilding = _.find(school.buildings, function(building) {
+    return building.begin_year <= year;
   });
-  return building || {};
+  return mainBuilding || {};
 }
 
-function getMainName(schoolId) {
-  let sortedSchoolNames = getSchoolNames(schoolId);
-  if (sortedSchoolNames.length) {
-    return sortedSchoolNames[0];
-  }
-  return {};
+function getMainName(school) {
+  return _.first(school.names) || {};
 }
 
-function getSchool(schoolId) {
-  return _schools[schoolId] || {};
-}
-
-function getSchoolDetails(schoolId) {
+function getSchoolDetails(school) {
   return {
-    schoolNames: getSchoolNames(schoolId),
-    buildings: getBuildings(schoolId)
+    schoolNames: school.names,
+    buildings: school.buildings
   };
 }
 
 function getSchools(schoolIds) {
   return _.map(schoolIds, function(id) {
-    const addresses = getMainBuilding(id).building.addresses;
+    const school = _schools[id];
+    if (_.isEmpty(school)) {
+      return {};
+    }
+    let addresses = [];
+    const mainBuilding = getMainBuilding(school);
+    if (mainBuilding.building && mainBuilding.building.addresses) {
+      addresses = mainBuilding.building.addresses;
+    }
     const address = (
       addresses.length ?
       `${addresses[0].street_name_fi}\, ${addresses[0].municipality_fi}` :
@@ -127,27 +108,27 @@ function getSchools(schoolIds) {
     );
     return {
       id: id,
-      name: getMainName(id).official_name,
+      name: getMainName(school).official_name,
       address: address
     };
   }, this);
 }
 
 function getSchoolYearDetails(schoolId, year) {
-  const schoolNames = getSchoolNames(schoolId);
-  const buildings = getBuildings(schoolId);
-  if (!year) {
-    year = new Date().getFullYear();
+  const school = _schools[schoolId];
+  if (_.isEmpty(school)) {
+    return {};
   }
-  const schoolName = _.find(schoolNames, function(school) {
-    return school.begin_year <= year;
+  year = year || new Date().getFullYear();
+  const schoolName = _.find(school.names, function(name) {
+    return name.begin_year <= year;
   });
-  const building = _.find(buildings, function(build) {
-    return build.begin_year <= year;
+  const schoolBuilding = _.find(school.buildings, function(building) {
+    return building.begin_year <= year;
   });
   return {
     schoolName: schoolName || {},
-    building: building || {}
+    building: schoolBuilding || {}
   };
 }
 
@@ -157,19 +138,18 @@ function hasSchool(schoolId) {
 
 function _getSchoolByIdWrapper(func, defaultValue) {
   return function(schoolId) {
-    if (!defaultValue) {
-      defaultValue = [];
-    }
-    const school = getSchool(schoolId);
-    if (_.isEmpty(school)) {
-      return defaultValue;
-    }
-    return func(school);
+    defaultValue = defaultValue ? defaultValue : [];
+    const school = _schools[schoolId];
+    return _.isEmpty(school) ? defaultValue : func(school);
   };
 }
 
 function _receiveSchool(school) {
-  _schools[school.id] = school;
+  _schools[school.id] = {
+    id: school.id,
+    names: _.sortByOrder(school.names, ['end_year', 'begin_year'], [false, false]),
+    buildings: _.sortByOrder(school.buildings, ['end_year', 'begin_year'], [false, false])
+  };
 }
 
 function _receiveSchools(schools) {

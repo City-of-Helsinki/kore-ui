@@ -20,7 +20,7 @@ function getStateFromStores(schoolId) {
   return {
     fetchingData: SchoolStore.getFetchingData(),
     mainName: SchoolStore.getMainName(schoolId),
-    yearsActive: SchoolStore.calculateBeginAndEndYear(schoolId),
+    yearsActive: SchoolStore.getBeginAndEndYear(schoolId),
     mainBuildingInSelectedYear: SchoolStore.getMainBuildingInYear(schoolId, selectedYear),
     schoolDetails: SchoolStore.getSchoolDetails(schoolId),
     schoolYearDetails: SchoolStore.getSchoolYearDetails(
