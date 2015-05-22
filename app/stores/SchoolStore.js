@@ -68,15 +68,10 @@ function getMainBuildingInYear(schoolId, year) {
   if (_.isEmpty(school)) {
     return {};
   }
-
   if (!year) {
     return getMainBuilding(school);
   }
-
-  const mainBuilding = _.find(school.buildings, function(building) {
-    return building.begin_year <= year;
-  });
-  return mainBuilding || {};
+  return _getItemForYear(school, 'buildings', year) || {};
 }
 
 function getMainName(school) {
@@ -120,20 +115,21 @@ function getSchoolYearDetails(schoolId, year) {
     return {};
   }
   year = year || new Date().getFullYear();
-  const schoolName = _.find(school.names, function(name) {
-    return name.begin_year <= year;
-  });
-  const schoolBuilding = _.find(school.buildings, function(building) {
-    return building.begin_year <= year;
-  });
+
   return {
-    schoolName: schoolName || {},
-    building: schoolBuilding || {}
+    schoolName: _getItemForYear(school, 'names', year) || {},
+    building: _getItemForYear(school, 'buildings', year) || {}
   };
 }
 
 function hasSchool(schoolId) {
   return typeof _schools[schoolId] !== 'undefined';
+}
+
+function _getItemForYear(school, itemListName, year) {
+  return _.find(school[itemListName], function(item) {
+    return item.begin_year <= year;
+  });
 }
 
 function _getSchoolByIdWrapper(func, defaultValue) {
