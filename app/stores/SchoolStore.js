@@ -80,7 +80,7 @@ function getMainName(school) {
 
 function getSchoolDetails(school) {
   return {
-    schoolNames: school.names,
+    names: school.names,
     buildings: school.buildings
   };
 }

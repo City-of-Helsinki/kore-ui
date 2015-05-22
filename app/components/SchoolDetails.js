@@ -6,72 +6,64 @@ import InfoTable from './InfoTable';
 import {getAddressArrayFromBuilding} from '../core/utils';
 
 const itemGenerator = {
-  schoolNames: function(names) {
-    return {
-      key: 'school-names',
-      title: 'Koulun nimet',
-      expandable: false,
-      items: names.map(function(name, index) {
-        return {
-          key: 'school-name-' + index,  // This could better be the ID if retreived from API.
-          className: 'details-school-name',
-          name: name.official_name,
-          boxContent: [
-            name.begin_year,
-            <i className='fa fa-lg fa-long-arrow-right'/>,
-            name.end_year
-          ]
-        };
-      })
-    };
-  },
   buildings: function(buildings) {
-    return {
-      key: 'buildings',
-      title: 'Rakennukset ja sijainnit',
-      expandable: true,
-      items: buildings.map(function(building, index) {
-        return {
-          key: 'building-' + index,  // This could be the ID if retreived from API.
-          className: 'details-building',
-          name: getAddressArrayFromBuilding(building.building),
-          boxContent: [
-            building.begin_year,
-            <i className='fa fa-lg fa-long-arrow-right'/>,
-            building.end_year
-          ],
-          items: [
-            {
-              key: 'neighborhood-' + index,
-              name: building.building.neighborhood,
-              boxContent: 'alue'
-            },
-            {
-              key: 'architect-' + index,
-              name: building.building.architect,
-              boxContent: 'arkkitehti'
-            }
-          ]
-        };
-      })
-    };
+    return _.map(buildings, function(building) {
+      return {
+        key: 'building-' + building.id,
+        className: 'details-building',
+        name: getAddressArrayFromBuilding(building.building),
+        boxContent: getBoxContent(building),
+        items: [
+          {
+            key: 'neighborhood-of-building-' + building.id,
+            name: building.building.neighborhood,
+            boxContent: 'alue'
+          },
+          {
+            key: 'architect-of-building-' + building.id,
+            name: building.building.architect,
+            boxContent: 'arkkitehti'
+          }
+        ]
+      };
+    });
+  },
+  names: function(names) {
+    return _.map(names, function(name) {
+      return {
+        key: 'school-name-' + name.id,
+        className: 'details-school-name',
+        name: name.official_name,
+        boxContent: getBoxContent(name)
+      };
+    });
   }
 };
 
-function getInfoTable(table) {
-  return <InfoTable {...table}/>;
+function getBoxContent(item) {
+  return [
+    item.begin_year,
+    <i className='fa fa-lg fa-long-arrow-right'/>,
+    item.end_year
+  ];
 }
 
 class SchoolDetails extends React.Component {
   render() {
     const details = this.props.details;
-    const infoTables = _.map(details, function(list, key) {
-      return getInfoTable(itemGenerator[key](list));
-    });
     return (
       <div className='container'>
         <section className='school-details'>
-          {infoTables}
+          <InfoTable
+            title={'Koulun nimet'}
+            expandable={false}
+            items={itemGenerator.names(details.names)}
+          />
+          <InfoTable
+            title={'Rakennukset ja sijainnit'}
+            expandable={true}
+            items={itemGenerator.buildings(details.buildings)}
+          />
         </section>
       </div>
     );
@@ -80,13 +72,6 @@ class SchoolDetails extends React.Component {
 
 SchoolDetails.propTypes = {
   details: React.PropTypes.shape({
-    schoolNames: React.PropTypes.arrayOf(
-      React.PropTypes.shape({
-        'official_name': React.PropTypes.string,
-        'begin_year': React.PropTypes.number,
-        'end_year': React.PropTypes.number
-      })
-    ),
     buildings: React.PropTypes.arrayOf(
       React.PropTypes.shape({
         'begin_year': React.PropTypes.number,
@@ -101,6 +86,13 @@ SchoolDetails.propTypes = {
             })
           )
         })
+      })
+    ),
+    names: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        'official_name': React.PropTypes.string,
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
       })
     )
   })
