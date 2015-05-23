@@ -66,6 +66,9 @@ class InfoTable extends React.Component {
   }
 
   render() {
+    if (!this.props.items.length) {
+      return null;
+    }
     let itemsColumnOne;
     let itemsColumnTwo;
     [itemsColumnOne, itemsColumnTwo] = this.getItemsByColumn();

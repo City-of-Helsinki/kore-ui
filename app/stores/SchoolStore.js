@@ -82,6 +82,7 @@ function getSchoolDetails(school) {
   return {
     archives: school.archives,
     buildings: school.buildings,
+    fields: school.fields,
     names: school.names,
     types: school.types
   };
@@ -147,6 +148,7 @@ function _receiveSchool(school) {
   _schools[school.id] = {
     archives: _sortByYears(school.archives),
     buildings: _sortByYears(school.buildings),
+    fields: _sortByYears(school.fields),
     id: school.id,
     names: _sortByYears(school.names),
     types: _sortByYears(school.types)

@@ -38,6 +38,16 @@ const itemGenerator = {
       };
     });
   },
+  fields: function(fields) {
+    return _.map(fields, function(field, index) {
+      return {
+        key: 'school-field-' + index,
+        className: 'details-default',
+        name: field.field.description,
+        boxContent: getBoxContent(field)
+      };
+    });
+  },
   names: function(names) {
     return _.map(names, function(name) {
       return {
@@ -94,6 +104,11 @@ class SchoolDetails extends React.Component {
             expandable={true}
             items={itemGenerator.types(details.types)}
           />
+          <InfoTable
+            title={'Koulun alat'}
+            expandable={true}
+            items={itemGenerator.fields(details.fields)}
+          />
         </section>
       </div>
     );
@@ -123,6 +138,15 @@ SchoolDetails.propTypes = {
             })
           )
         })
+      })
+    ),
+    fields: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        field: React.PropTypes.shape({
+          description: React.PropTypes.string
+        }),
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
       })
     ),
     names: React.PropTypes.arrayOf(
