@@ -83,6 +83,7 @@ function getSchoolDetails(school) {
     archives: school.archives,
     buildings: school.buildings,
     fields: school.fields,
+    languages: school.languages,
     names: school.names,
     types: school.types
   };
@@ -150,6 +151,7 @@ function _receiveSchool(school) {
     buildings: _sortByYears(school.buildings),
     fields: _sortByYears(school.fields),
     id: school.id,
+    languages: _sortByYears(school.languages),
     names: _sortByYears(school.names),
     types: _sortByYears(school.types)
   };

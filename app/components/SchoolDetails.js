@@ -48,6 +48,16 @@ const itemGenerator = {
       };
     });
   },
+  languages: function(languages) {
+    return _.map(languages, function(language) {
+      return {
+        key: 'school-language-' + language.id,
+        className: 'details-default',
+        name: language.language,
+        boxContent: getBoxContent(language)
+      };
+    });
+  },
   names: function(names) {
     return _.map(names, function(name) {
       return {
@@ -109,6 +119,11 @@ class SchoolDetails extends React.Component {
             expandable={true}
             items={itemGenerator.fields(details.fields)}
           />
+          <InfoTable
+            title={'Kielet'}
+            expandable={true}
+            items={itemGenerator.languages(details.languages)}
+          />
         </section>
       </div>
     );
@@ -145,6 +160,13 @@ SchoolDetails.propTypes = {
         field: React.PropTypes.shape({
           description: React.PropTypes.string
         }),
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
+      })
+    ),
+    languages: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        language: React.PropTypes.string,
         'begin_year': React.PropTypes.number,
         'end_year': React.PropTypes.number
       })
