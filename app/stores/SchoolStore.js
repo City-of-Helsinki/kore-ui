@@ -144,15 +144,19 @@ function _getSchoolByIdWrapper(func, defaultValue) {
 
 function _receiveSchool(school) {
   _schools[school.id] = {
+    archives: _sortByYears(school.archives),
+    buildings: _sortByYears(school.buildings),
     id: school.id,
-    names: _.sortByOrder(school.names, ['end_year', 'begin_year'], [false, false]),
-    buildings: _.sortByOrder(school.buildings, ['end_year', 'begin_year'], [false, false]),
-    archives: _.sortByOrder(school.archives, ['end_year', 'begin_year'], [false, false])
+    names: _sortByYears(school.names)
   };
 }
 
 function _receiveSchools(schools) {
   _.each(schools, _receiveSchool);
+}
+
+function _sortByYears(list) {
+  return _.sortByOrder(list, ['end_year', 'begin_year'], [false, false]);
 }
 
 export default SchoolStore;
