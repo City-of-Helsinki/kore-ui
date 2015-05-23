@@ -6,6 +6,16 @@ import InfoTable from './InfoTable';
 import {getAddressArrayFromBuilding} from '../core/utils';
 
 const itemGenerator = {
+  archives: function(archives) {
+    return _.map(archives, function(archive, index) {
+      return {
+        key: 'school-archive-' + index,
+        className: 'details-archive',
+        name: archive.location,
+        boxContent: getBoxContent(archive)
+      };
+    });
+  },
   buildings: function(buildings) {
     return _.map(buildings, function(building) {
       return {
@@ -64,6 +74,11 @@ class SchoolDetails extends React.Component {
             expandable={true}
             items={itemGenerator.buildings(details.buildings)}
           />
+          <InfoTable
+            title={'Arkistot'}
+            expandable={true}
+            items={itemGenerator.archives(details.archives)}
+          />
         </section>
       </div>
     );
@@ -72,6 +87,13 @@ class SchoolDetails extends React.Component {
 
 SchoolDetails.propTypes = {
   details: React.PropTypes.shape({
+    archives: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        'location': React.PropTypes.string,
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
+      })
+    ),
     buildings: React.PropTypes.arrayOf(
       React.PropTypes.shape({
         'begin_year': React.PropTypes.number,
