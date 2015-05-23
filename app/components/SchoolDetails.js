@@ -47,6 +47,16 @@ const itemGenerator = {
         boxContent: getBoxContent(name)
       };
     });
+  },
+  types: function(types) {
+    return _.map(types, function(type, index) {
+      return {
+        key: 'school-type-' + index,
+        className: 'details-building',
+        name: type.type.name,
+        boxContent: getBoxContent(type)
+      };
+    });
   }
 };
 
@@ -78,6 +88,11 @@ class SchoolDetails extends React.Component {
             title={'Arkistot'}
             expandable={true}
             items={itemGenerator.archives(details.archives)}
+          />
+          <InfoTable
+            title={'Koulun tyypit'}
+            expandable={true}
+            items={itemGenerator.types(details.types)}
           />
         </section>
       </div>
@@ -113,6 +128,15 @@ SchoolDetails.propTypes = {
     names: React.PropTypes.arrayOf(
       React.PropTypes.shape({
         'official_name': React.PropTypes.string,
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
+      })
+    ),
+    types: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        type: React.PropTypes.shape({
+          name: React.PropTypes.string
+        }),
         'begin_year': React.PropTypes.number,
         'end_year': React.PropTypes.number
       })
