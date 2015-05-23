@@ -2,28 +2,12 @@
 
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
-import {EventEmitter} from 'events';
+import BaseStore from './BaseStore';
 
-const CHANGE_EVENT = 'change';
 let _schoolTimelineYear = null;
 
-
-const UIStore = Object.assign({}, EventEmitter.prototype, {
-  emitChange: function() {
-    this.emit(CHANGE_EVENT);
-  },
-
-  addChangeListener: function(callback) {
-    this.on(CHANGE_EVENT, callback);
-  },
-
-  removeChangeListener: function(callback) {
-    this.removeListener(CHANGE_EVENT, callback);
-  },
-
-  getSchoolTimelineYear: function() {
-    return _schoolTimelineYear;
-  }
+const UIStore = Object.assign({}, BaseStore, {
+  getSchoolTimelineYear
 });
 
 UIStore.dispatchToken = AppDispatcher.register(function(payload) {
@@ -45,6 +29,10 @@ UIStore.dispatchToken = AppDispatcher.register(function(payload) {
       // noop
   }
 });
+
+function getSchoolTimelineYear() {
+  return _schoolTimelineYear;
+}
 
 function _updateYear(year) {
   _schoolTimelineYear = year;

@@ -6,72 +6,139 @@ import InfoTable from './InfoTable';
 import {getAddressArrayFromBuilding} from '../core/utils';
 
 const itemGenerator = {
-  schoolNames: function(names) {
-    return {
-      key: 'school-names',
-      title: 'Koulun nimet',
-      expandable: false,
-      items: names.map(function(name, index) {
-        return {
-          key: 'school-name-' + index,  // This could better be the ID if retreived from API.
-          className: 'details-school-name',
-          name: name.official_name,
-          boxContent: [
-            name.begin_year,
-            <i className='fa fa-lg fa-long-arrow-right'/>,
-            name.end_year
-          ]
-        };
-      })
-    };
+  archives: function(archives) {
+    return _.map(archives, function(archive, index) {
+      return {
+        key: 'school-archive-' + index,
+        className: 'details-archive',
+        name: archive.location,
+        boxContent: getBoxContent(archive)
+      };
+    });
   },
   buildings: function(buildings) {
-    return {
-      key: 'buildings',
-      title: 'Rakennukset ja sijainnit',
-      expandable: true,
-      items: buildings.map(function(building, index) {
-        return {
-          key: 'building-' + index,  // This could be the ID if retreived from API.
-          className: 'details-building',
-          name: getAddressArrayFromBuilding(building.building),
-          boxContent: [
-            building.begin_year,
-            <i className='fa fa-lg fa-long-arrow-right'/>,
-            building.end_year
-          ],
-          items: [
-            {
-              key: 'neighborhood-' + index,
-              name: building.building.neighborhood,
-              boxContent: 'alue'
-            },
-            {
-              key: 'architect-' + index,
-              name: building.building.architect,
-              boxContent: 'arkkitehti'
-            }
-          ]
-        };
-      })
-    };
+    return _.map(buildings, function(building) {
+      return {
+        key: 'building-' + building.id,
+        className: 'details-building',
+        name: getAddressArrayFromBuilding(building.building),
+        boxContent: getBoxContent(building),
+        items: [
+          {
+            key: 'neighborhood-of-building-' + building.id,
+            name: building.building.neighborhood,
+            boxContent: 'alue'
+          },
+          {
+            key: 'architect-of-building-' + building.id,
+            name: building.building.architect,
+            boxContent: 'arkkitehti'
+          }
+        ]
+      };
+    });
+  },
+  fields: function(fields) {
+    return _.map(fields, function(field, index) {
+      return {
+        key: 'school-field-' + index,
+        className: 'details-default',
+        name: field.field.description,
+        boxContent: getBoxContent(field)
+      };
+    });
+  },
+  genders: function(genders) {
+    return _.map(genders, function(gender, index) {
+      return {
+        key: 'school-gender-' + index,
+        className: 'details-default',
+        name: gender.gender,
+        boxContent: getBoxContent(gender)
+      };
+    });
+  },
+  languages: function(languages) {
+    return _.map(languages, function(language) {
+      return {
+        key: 'school-language-' + language.id,
+        className: 'details-default',
+        name: language.language,
+        boxContent: getBoxContent(language)
+      };
+    });
+  },
+  names: function(names) {
+    return _.map(names, function(name) {
+      return {
+        key: 'school-name-' + name.id,
+        className: 'details-school-name',
+        name: name.official_name,
+        boxContent: getBoxContent(name)
+      };
+    });
+  },
+  types: function(types) {
+    return _.map(types, function(type, index) {
+      return {
+        key: 'school-type-' + index,
+        className: 'details-building',
+        name: type.type.name,
+        boxContent: getBoxContent(type)
+      };
+    });
   }
 };
 
-function getInfoTable(table) {
-  return <InfoTable {...table}/>;
+function getBoxContent(item) {
+  return [
+    item.begin_year,
+    <i className='fa fa-lg fa-long-arrow-right'/>,
+    item.end_year
+  ];
 }
 
 class SchoolDetails extends React.Component {
   render() {
     const details = this.props.details;
-    const infoTables = _.map(details, function(list, key) {
-      return getInfoTable(itemGenerator[key](list));
-    });
     return (
       <div className='container'>
         <section className='school-details'>
-          {infoTables}
+          <InfoTable
+            title={'Koulun nimet'}
+            expandable={false}
+            items={itemGenerator.names(details.names)}
+          />
+          <InfoTable
+            title={'Rakennukset ja sijainnit'}
+            expandable={true}
+            items={itemGenerator.buildings(details.buildings)}
+          />
+          <InfoTable
+            title={'Arkistot'}
+            expandable={true}
+            items={itemGenerator.archives(details.archives)}
+          />
+          <InfoTable
+            title={'Koulun tyypit'}
+            expandable={true}
+            items={itemGenerator.types(details.types)}
+          />
+          <InfoTable
+            title={'Koulun alat'}
+            expandable={true}
+            items={itemGenerator.fields(details.fields)}
+          />
+          <InfoTable
+            title={'Kielet'}
+            expandable={true}
+            items={itemGenerator.languages(details.languages)}
+          />
+          <InfoTable
+            title={'Sukupuolet'}
+            expandable={true}
+            items={itemGenerator.genders(details.genders)}
+          />
         </section>
       </div>
     );
@@ -80,9 +147,9 @@ class SchoolDetails extends React.Component {
 
 SchoolDetails.propTypes = {
   details: React.PropTypes.shape({
-    schoolNames: React.PropTypes.arrayOf(
+    archives: React.PropTypes.arrayOf(
       React.PropTypes.shape({
-        'official_name': React.PropTypes.string,
+        'location': React.PropTypes.string,
         'begin_year': React.PropTypes.number,
         'end_year': React.PropTypes.number
       })
@@ -101,6 +168,45 @@ SchoolDetails.propTypes = {
             })
           )
         })
+      })
+    ),
+    fields: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        field: React.PropTypes.shape({
+          description: React.PropTypes.string
+        }),
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
+      })
+    ),
+    genders: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        gender: React.PropTypes.string,
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
+      })
+    ),
+    languages: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        language: React.PropTypes.string,
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
+      })
+    ),
+    names: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        'official_name': React.PropTypes.string,
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
+      })
+    ),
+    types: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        type: React.PropTypes.shape({
+          name: React.PropTypes.string
+        }),
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
       })
     )
   })
