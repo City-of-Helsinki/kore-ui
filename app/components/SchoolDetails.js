@@ -48,6 +48,16 @@ const itemGenerator = {
       };
     });
   },
+  genders: function(genders) {
+    return _.map(genders, function(gender, index) {
+      return {
+        key: 'school-gender-' + index,
+        className: 'details-default',
+        name: gender.gender,
+        boxContent: getBoxContent(gender)
+      };
+    });
+  },
   languages: function(languages) {
     return _.map(languages, function(language) {
       return {
@@ -124,6 +134,11 @@ class SchoolDetails extends React.Component {
             expandable={true}
             items={itemGenerator.languages(details.languages)}
           />
+          <InfoTable
+            title={'Sukupuolet'}
+            expandable={true}
+            items={itemGenerator.genders(details.genders)}
+          />
         </section>
       </div>
     );
@@ -160,6 +175,13 @@ SchoolDetails.propTypes = {
         field: React.PropTypes.shape({
           description: React.PropTypes.string
         }),
+        'begin_year': React.PropTypes.number,
+        'end_year': React.PropTypes.number
+      })
+    ),
+    genders: React.PropTypes.arrayOf(
+      React.PropTypes.shape({
+        gender: React.PropTypes.string,
         'begin_year': React.PropTypes.number,
         'end_year': React.PropTypes.number
       })
