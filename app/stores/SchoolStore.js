@@ -6,6 +6,7 @@ import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
 import BuildingStore from './BuildingStore';
 import PrincipalStore from './PrincipalStore';
+import {sortByYears} from '../core/utils';
 
 let _schools = {};
 let _fetchingData = false;
@@ -184,29 +185,25 @@ function _parseRelationalData(relationObjects, relationIds, objectName) {
 function _receiveSchools(entities) {
   _.each(entities.schools, function(school) {
     _schools[school.id] = {
-      archives: _sortByYears(school.archives),
-      buildings: _sortByYears(_parseRelationalData(
+      archives: sortByYears(school.archives),
+      buildings: sortByYears(_parseRelationalData(
         entities.schoolBuildings,
         school.buildings,
         'building'
       )),
-      fields: _sortByYears(school.fields),
-      genders: _sortByYears(school.genders),
+      fields: sortByYears(school.fields),
+      genders: sortByYears(school.genders),
       id: school.id,
-      languages: _sortByYears(school.languages),
-      names: _sortByYears(school.names),
-      principals: _sortByYears(_parseRelationalData(
+      languages: sortByYears(school.languages),
+      names: sortByYears(school.names),
+      principals: sortByYears(_parseRelationalData(
         entities.schoolPrincipals,
         school.principals,
         'principal'
       )),
-      types: _sortByYears(school.types)
+      types: sortByYears(school.types)
     };
   });
-}
-
-function _sortByYears(list) {
-  return _.sortByOrder(list, ['end_year', 'begin_year'], [false, false]);
 }
 
 export default SchoolStore;

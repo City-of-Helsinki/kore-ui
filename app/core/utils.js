@@ -1,5 +1,7 @@
 'use strict';
 
+import _ from 'lodash';
+
 function getAddressArrayFromBuilding(building) {
   if (building && building.addresses && building.addresses.length) {
     return [
@@ -11,6 +13,11 @@ function getAddressArrayFromBuilding(building) {
   return '';
 }
 
+function sortByYears(list) {
+  return _.sortByOrder(list, ['end_year', 'begin_year'], [false, false]);
+}
+
 export default {
-  getAddressArrayFromBuilding: getAddressArrayFromBuilding
+  getAddressArrayFromBuilding: getAddressArrayFromBuilding,
+  sortByYears: sortByYears
 };

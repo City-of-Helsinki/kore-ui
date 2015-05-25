@@ -4,6 +4,7 @@ import _ from 'lodash';
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
+import {sortByYears} from '../core/utils';
 
 let _fetchingData = false;
 let _buildings = {};
@@ -56,7 +57,14 @@ function _getBuildingByIdWrapper(func, defaultValue) {
 }
 
 function _receiveBuildings(buildings) {
-  _.assign(_buildings, buildings);
+  _.each(buildings, function(building) {
+    _buildings[building.id] = {
+      addresses: sortByYears(building.addresses),
+      architect: building.architect,
+      id: building.id,
+      neighborhood: building.neighborhood
+    };
+  });
 }
 
 export default BuildingStore;
