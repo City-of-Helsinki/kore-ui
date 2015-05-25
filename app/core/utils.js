@@ -13,11 +13,18 @@ function getAddressArrayFromBuilding(building) {
   return '';
 }
 
+function getItemForYear(itemList, year) {
+  return _.find(itemList, function(item) {
+    return item.begin_year <= year;
+  });
+}
+
 function sortByYears(list) {
   return _.sortByOrder(list, ['end_year', 'begin_year'], [false, false]);
 }
 
 export default {
   getAddressArrayFromBuilding: getAddressArrayFromBuilding,
+  getItemForYear: getItemForYear,
   sortByYears: sortByYears
 };

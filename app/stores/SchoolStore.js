@@ -6,7 +6,7 @@ import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
 import BuildingStore from './BuildingStore';
 import PrincipalStore from './PrincipalStore';
-import {sortByYears} from '../core/utils';
+import {getItemForYear, sortByYears} from '../core/utils';
 
 let _schools = {};
 let _fetchingData = false;
@@ -79,7 +79,7 @@ function getMainBuildingInYear(school, year) {
   if (!year) {
     return getMainBuilding(school);
   }
-  return _getItemForYear(school, 'buildings', year) || {};
+  return getItemForYear(school.buildings, year) || {};
 }
 
 function getMainName(school) {
@@ -127,27 +127,21 @@ function getSchools(schoolIds) {
 function getSchoolYearDetails(school, year) {
   year = year || new Date().getFullYear();
 
-  const schoolBuilding = _getItemForYear(school, 'buildings', year);
+  const schoolBuilding = getItemForYear(school.buildings, year);
   const building = schoolBuilding ? BuildingStore.getBuilding(schoolBuilding.id) : {};
-  const schoolPrincipal = _getItemForYear(school, 'principals', year);
+  const schoolPrincipal = getItemForYear(school.principals, year);
   const principal = schoolPrincipal ? PrincipalStore.getPrincipal(schoolPrincipal.id) : {};
 
   return {
-    archive: _getItemForYear(school, 'archives', year) || {},
+    archive: getItemForYear(school.archives, year) || {},
     building: building,
     principal: principal,
-    schoolName: _getItemForYear(school, 'names', year) || {}
+    schoolName: getItemForYear(school.names, year) || {}
   };
 }
 
 function hasSchool(schoolId) {
   return typeof _schools[schoolId] !== 'undefined';
-}
-
-function _getItemForYear(school, itemListName, year) {
-  return _.find(school[itemListName], function(item) {
-    return item.begin_year <= year;
-  });
 }
 
 function _getRelationalData(relationObjects, getter) {
