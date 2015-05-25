@@ -4,13 +4,14 @@ import _ from 'lodash';
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
+import {getItemByIdWrapper} from '../core/utils';
 
 let _fetchingData = false;
 let _principals = {};
 
 const PrincipalStore = Object.assign({}, BaseStore, {
   getFetchingData,
-  getPrincipal: _getPrincipalByIdWrapper(getPrincipal, {})
+  getPrincipal: getItemByIdWrapper(getPrincipal, _principals)
 });
 
 PrincipalStore.dispatchToken = AppDispatcher.register(function(payload) {
@@ -45,14 +46,6 @@ function getFetchingData() {
 
 function getPrincipal(principal) {
   return principal;
-}
-
-function _getPrincipalByIdWrapper(func, defaultValue) {
-  return function(principalId) {
-    defaultValue = defaultValue ? defaultValue : [];
-    const principal = _principals[principalId];
-    return _.isEmpty(principal) ? defaultValue : func(principal);
-  };
 }
 
 function _receivePrincipals(principals) {

@@ -6,20 +6,20 @@ import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
 import BuildingStore from './BuildingStore';
 import PrincipalStore from './PrincipalStore';
-import {getItemForYear, sortByYears} from '../core/utils';
+import {getItemByIdWrapper, getItemForYear, sortByYears} from '../core/utils';
 
 let _schools = {};
 let _fetchingData = false;
 
 const SchoolStore = Object.assign({}, BaseStore, {
-  getBeginAndEndYear: _getSchoolByIdWrapper(getBeginAndEndYear, {}),
+  getBeginAndEndYear: getItemByIdWrapper(getBeginAndEndYear, _schools),
   getFetchingData,
-  getLocation: _getSchoolByIdWrapper(getLocation, {}),
-  getMainBuilding: _getSchoolByIdWrapper(getMainBuilding, {}),
-  getMainBuildingInYear: _getSchoolByIdWrapper(getMainBuildingInYear, {}),
-  getMainName: _getSchoolByIdWrapper(getMainName, {}),
-  getSchoolDetails: _getSchoolByIdWrapper(getSchoolDetails, {}),
-  getSchoolYearDetails: _getSchoolByIdWrapper(getSchoolYearDetails, {}),
+  getLocation: getItemByIdWrapper(getLocation, _schools),
+  getMainBuilding: getItemByIdWrapper(getMainBuilding, _schools),
+  getMainBuildingInYear: getItemByIdWrapper(getMainBuildingInYear, _schools),
+  getMainName: getItemByIdWrapper(getMainName, _schools),
+  getSchoolDetails: getItemByIdWrapper(getSchoolDetails, _schools),
+  getSchoolYearDetails: getItemByIdWrapper(getSchoolYearDetails, _schools),
   getSchools,
   hasSchool
 });
@@ -163,16 +163,6 @@ function _getRelationanlObject(relationObject, getter) {
     'begin_year': relationObject.begin_year,
     'end_year': relationObject.end_year
   });
-}
-
-function _getSchoolByIdWrapper(func, defaultValue) {
-  return function(schoolId) {
-    defaultValue = defaultValue ? defaultValue : [];
-    const school = _schools[schoolId];
-    let newArgs = Array.prototype.slice.call(arguments, 1);
-    newArgs.unshift(school);
-    return _.isEmpty(school) ? defaultValue : func.apply(this, newArgs);
-  };
 }
 
 function _parseRelationalData(relationObjects, relationIds, objectName) {
