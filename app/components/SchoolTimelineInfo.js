@@ -39,7 +39,7 @@ function processRow(details) {
       key: 'school-building',
       className: 'details-building',
       // The address should be sorted by time as well.
-      name: getAddressArrayFromBuilding(details.building.building),
+      name: getAddressArrayFromBuilding(details.building),
       boxContent: [
         details.building.begin_year,
         <i className='fa fa-lg fa-long-arrow-right'/>,

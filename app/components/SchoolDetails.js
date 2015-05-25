@@ -21,17 +21,17 @@ const itemGenerator = {
       return {
         key: 'building-' + building.id,
         className: 'details-building',
-        name: getAddressArrayFromBuilding(building.building),
+        name: getAddressArrayFromBuilding(building),
         boxContent: getBoxContent(building),
         items: [
           {
             key: 'neighborhood-of-building-' + building.id,
-            name: building.building.neighborhood,
+            name: building.neighborhood,
             boxContent: 'alue'
           },
           {
             key: 'architect-of-building-' + building.id,
-            name: building.building.architect,
+            name: building.architect,
             boxContent: 'arkkitehti'
           }
         ]
