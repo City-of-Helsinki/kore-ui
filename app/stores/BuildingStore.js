@@ -4,14 +4,15 @@ import _ from 'lodash';
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
-import {sortByYears} from '../core/utils';
+import {getAddressString, sortByYears} from '../core/utils';
 
 let _fetchingData = false;
 let _buildings = {};
 
 const BuildingStore = Object.assign({}, BaseStore, {
   getFetchingData,
-  getBuilding: _getBuildingByIdWrapper(getBuilding, {})
+  getBuilding: _getBuildingByIdWrapper(getBuilding, {}),
+  getLocation: _getBuildingByIdWrapper(getLocation, {})
 });
 
 BuildingStore.dispatchToken = AppDispatcher.register(function(payload) {
@@ -47,6 +48,14 @@ function getFetchingData() {
 function getBuilding(building) {
   return building;
 }
+
+function getLocation(building) {
+  const address = _.find(building.addresses, function(current) {
+    return !_.isEmpty(current.location);
+  }) || {};
+  return _.assign({}, address.location, {address: getAddressString(address)});
+}
+
 
 function _getBuildingByIdWrapper(func, defaultValue) {
   return function(buildingId) {

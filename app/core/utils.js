@@ -13,6 +13,12 @@ function getAddressArrayFromBuilding(building) {
   return '';
 }
 
+function getAddressString(address) {
+  const street = address.street_name_fi || '';
+  const municipality = address.municipality_fi || '';
+  return `${street}\, ${municipality}`;
+}
+
 function getItemForYear(itemList, year) {
   return _.find(itemList, function(item) {
     return item.begin_year <= year;
@@ -25,6 +31,7 @@ function sortByYears(list) {
 
 export default {
   getAddressArrayFromBuilding: getAddressArrayFromBuilding,
+  getAddressString: getAddressString,
   getItemForYear: getItemForYear,
   sortByYears: sortByYears
 };

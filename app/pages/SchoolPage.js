@@ -27,6 +27,7 @@ function getStateFromStores(schoolId) {
       schoolId,
       selectedYear
     ),
+    location: SchoolStore.getLocation(schoolId),
     currentYear: selectedYear
   };
 }
@@ -84,7 +85,11 @@ class SchoolPage extends React.Component {
                 fetchingData={this.state.fetchingData}
                 building={this.state.mainBuildingInSelectedYear}
               />
-              <SchoolMap />
+              <div className='school-map'>
+                <SchoolMap
+                  location={this.state.location}
+                />
+              </div>
             </div>
           </div>
           <SchoolDetails details={this.state.schoolDetails} />

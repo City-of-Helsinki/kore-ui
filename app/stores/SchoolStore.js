@@ -14,6 +14,7 @@ let _fetchingData = false;
 const SchoolStore = Object.assign({}, BaseStore, {
   getBeginAndEndYear: _getSchoolByIdWrapper(getBeginAndEndYear, {}),
   getFetchingData,
+  getLocation: _getSchoolByIdWrapper(getLocation, {}),
   getMainBuilding: _getSchoolByIdWrapper(getMainBuilding, {}),
   getMainBuildingInYear: _getSchoolByIdWrapper(getMainBuildingInYear, {}),
   getMainName: _getSchoolByIdWrapper(getMainName, {}),
@@ -66,6 +67,12 @@ function getBeginAndEndYear(school) {
     endYear: currentName ? currentName.end_year : null
   };
 }
+
+function getLocation(school) {
+  const building = getMainBuilding(school);
+  return BuildingStore.getLocation(building.id);
+}
+
 
 function getFetchingData() {
   return _fetchingData;
