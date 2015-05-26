@@ -4,25 +4,28 @@ import _ from 'lodash';
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
+import BuildingStore from './BuildingStore';
 import PrincipalStore from './PrincipalStore';
+import {getItemByIdWrapper, getItemForYear, sortByYears} from '../core/utils';
 
 let _schools = {};
 let _fetchingData = false;
 
 const SchoolStore = Object.assign({}, BaseStore, {
-  getBeginAndEndYear: _getSchoolByIdWrapper(getBeginAndEndYear, {}),
+  getBeginAndEndYear: getItemByIdWrapper(getBeginAndEndYear, _schools),
+  getBuildingForYear: getItemByIdWrapper(getBuildingForYear, _schools),
   getFetchingData,
-  getMainBuilding: _getSchoolByIdWrapper(getMainBuilding, {}),
-  getMainBuildingInYear: _getSchoolByIdWrapper(getMainBuildingInYear, {}),
-  getMainName: _getSchoolByIdWrapper(getMainName, {}),
-  getSchoolDetails: _getSchoolByIdWrapper(getSchoolDetails, {}),
-  getSchoolYearDetails: _getSchoolByIdWrapper(getSchoolYearDetails, {}),
+  getLocationForYear: getItemByIdWrapper(getLocationForYear, _schools),
+  getMainName: getItemByIdWrapper(getMainName, _schools),
+  getSchoolDetails: getItemByIdWrapper(getSchoolDetails, _schools),
+  getSchoolYearDetails: getItemByIdWrapper(getSchoolYearDetails, _schools),
   getSchools,
   hasSchool
 });
 
 SchoolStore.dispatchToken = AppDispatcher.register(function(payload) {
   AppDispatcher.waitFor([
+    BuildingStore.dispatchToken,
     PrincipalStore.dispatchToken
   ]);
 
@@ -64,20 +67,19 @@ function getBeginAndEndYear(school) {
   };
 }
 
+function getBuildingForYear(school, year) {
+  year = year || _getLatestYear(school);
+  return getItemForYear(school.buildings, year) || {};
+}
+
+function getLocationForYear(school, year) {
+  year = year || _getLatestYear(school);
+  const building = getBuildingForYear(school, year);
+  return BuildingStore.getLocationForYear(building.id, year);
+}
+
 function getFetchingData() {
   return _fetchingData;
-}
-
-function getMainBuilding(school) {
-  return _.first(school.buildings) || {};
-}
-
-
-function getMainBuildingInYear(school, year) {
-  if (!year) {
-    return getMainBuilding(school);
-  }
-  return _getItemForYear(school, 'buildings', year) || {};
 }
 
 function getMainName(school) {
@@ -87,12 +89,12 @@ function getMainName(school) {
 function getSchoolDetails(school) {
   return {
     archives: school.archives,
-    buildings: school.buildings,
+    buildings: _getRelationalData(school.buildings, BuildingStore.getBuilding),
     fields: school.fields,
     genders: school.genders,
     languages: school.languages,
     names: school.names,
-    principals: _getPrincipals(school),
+    principals: _getRelationalData(school.principals, PrincipalStore.getPrincipal),
     types: school.types
   };
 }
@@ -104,9 +106,10 @@ function getSchools(schoolIds) {
       return {};
     }
     let addresses = [];
-    const mainBuilding = getMainBuilding(school);
-    if (mainBuilding.building && mainBuilding.building.addresses) {
-      addresses = mainBuilding.building.addresses;
+    const schoolBuilding = getBuildingForYear(school, null);
+    const building = _getRelationanlObject(schoolBuilding, BuildingStore.getBuilding);
+    if (building && building.addresses) {
+      addresses = building.addresses;
     }
     const address = (
       addresses.length ?
@@ -122,16 +125,17 @@ function getSchools(schoolIds) {
 }
 
 function getSchoolYearDetails(school, year) {
-  year = year || new Date().getFullYear();
-
-  const schoolPrincipal = _getItemForYear(school, 'principals', year);
+  year = year || _getLatestYear(school);
+  const schoolBuilding = getItemForYear(school.buildings, year);
+  const building = schoolBuilding ? BuildingStore.getBuilding(schoolBuilding.id) : {};
+  const schoolPrincipal = getItemForYear(school.principals, year);
   const principal = schoolPrincipal ? PrincipalStore.getPrincipal(schoolPrincipal.id) : {};
 
   return {
-    archive: _getItemForYear(school, 'archives', year) || {},
-    building: _getItemForYear(school, 'buildings', year) || {},
+    archive: getItemForYear(school.archives, year) || {},
+    building: building,
     principal: principal,
-    schoolName: _getItemForYear(school, 'names', year) || {}
+    schoolName: getItemForYear(school.names, year) || {}
   };
 }
 
@@ -139,64 +143,54 @@ function hasSchool(schoolId) {
   return typeof _schools[schoolId] !== 'undefined';
 }
 
-function _getItemForYear(school, itemListName, year) {
-  return _.find(school[itemListName], function(item) {
-    return item.begin_year <= year;
+function _getLatestYear(school) {
+  return getBeginAndEndYear(school).endYear || new Date().getFullYear();
+}
+
+function _getRelationalData(relationObjects, getter) {
+  return _.map(relationObjects, function(relationObject) {
+    return _getRelationanlObject(relationObject, getter);
   });
 }
 
-function _getPrincipals(school) {
-  return _.map(school.principals, function(schoolPrincipal) {
-    const principal = PrincipalStore.getPrincipal(schoolPrincipal.id);
-    return _.assign(principal, {
-      'begin_year': schoolPrincipal.begin_year,
-      'end_year': schoolPrincipal.end_year
-    });
+function _getRelationanlObject(relationObject, getter) {
+  let object = getter(relationObject.id);
+  return _.assign(object, {
+    'begin_year': relationObject.begin_year,
+    'end_year': relationObject.end_year
   });
 }
 
-function _getSchoolByIdWrapper(func, defaultValue) {
-  return function(schoolId) {
-    defaultValue = defaultValue ? defaultValue : [];
-    const school = _schools[schoolId];
-    let newArgs = Array.prototype.slice.call(arguments, 1);
-    newArgs.unshift(school);
-    return _.isEmpty(school) ? defaultValue : func.apply(this, newArgs);
-  };
-}
-
-function _parsePrincipals(principalIds, schoolPrincipals) {
-  let schoolPrincipal;
-  return _.map(principalIds, function(principalId) {
-    schoolPrincipal = schoolPrincipals[principalId];
-    return {
-      'begin_year': schoolPrincipal.begin_year,
-      'end_year': schoolPrincipal.endYear,
-      id: schoolPrincipal.principal
-    };
+function _parseRelationalData(relationObjects, relationIds, objectName) {
+  let relationObject;
+  return _.map(relationIds, function(id) {
+    relationObject = relationObjects[id];
+    return _.assign({}, relationObject, {id: relationObject[objectName]});
   });
 }
 
 function _receiveSchools(entities) {
   _.each(entities.schools, function(school) {
     _schools[school.id] = {
-      archives: _sortByYears(school.archives),
-      buildings: _sortByYears(school.buildings),
-      fields: _sortByYears(school.fields),
-      genders: _sortByYears(school.genders),
+      archives: sortByYears(school.archives),
+      buildings: sortByYears(_parseRelationalData(
+        entities.schoolBuildings,
+        school.buildings,
+        'building'
+      )),
+      fields: sortByYears(school.fields),
+      genders: sortByYears(school.genders),
       id: school.id,
-      languages: _sortByYears(school.languages),
-      names: _sortByYears(school.names),
-      principals: _sortByYears(
-        _parsePrincipals(school.principals, entities.schoolPrincipals)
-      ),
-      types: _sortByYears(school.types)
+      languages: sortByYears(school.languages),
+      names: sortByYears(school.names),
+      principals: sortByYears(_parseRelationalData(
+        entities.schoolPrincipals,
+        school.principals,
+        'principal'
+      )),
+      types: sortByYears(school.types)
     };
   });
-}
-
-function _sortByYears(list) {
-  return _.sortByOrder(list, ['end_year', 'begin_year'], [false, false]);
 }
 
 export default SchoolStore;

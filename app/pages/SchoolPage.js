@@ -21,12 +21,13 @@ function getStateFromStores(schoolId) {
     fetchingData: SchoolStore.getFetchingData(),
     mainName: SchoolStore.getMainName(schoolId),
     yearsActive: SchoolStore.getBeginAndEndYear(schoolId),
-    mainBuildingInSelectedYear: SchoolStore.getMainBuildingInYear(schoolId, selectedYear),
+    buildingInSelectedYear: SchoolStore.getBuildingForYear(schoolId, selectedYear),
     schoolDetails: SchoolStore.getSchoolDetails(schoolId),
     schoolYearDetails: SchoolStore.getSchoolYearDetails(
       schoolId,
       selectedYear
     ),
+    locationForSelectedYear: SchoolStore.getLocationForYear(schoolId, selectedYear),
     currentYear: selectedYear
   };
 }
@@ -82,9 +83,14 @@ class SchoolPage extends React.Component {
             <div className='school-image-map'>
               <SchoolImage
                 fetchingData={this.state.fetchingData}
-                building={this.state.mainBuildingInSelectedYear}
+                building={this.state.buildingInSelectedYear}
               />
-              <SchoolMap />
+              <div className='school-map'>
+                <SchoolMap
+                  fetchingData={this.state.fetchingData}
+                  location={this.state.locationForSelectedYear}
+                />
+              </div>
             </div>
           </div>
           <SchoolDetails details={this.state.schoolDetails} />
