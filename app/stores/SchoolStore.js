@@ -13,10 +13,9 @@ let _fetchingData = false;
 
 const SchoolStore = Object.assign({}, BaseStore, {
   getBeginAndEndYear: getItemByIdWrapper(getBeginAndEndYear, _schools),
+  getBuildingForYear: getItemByIdWrapper(getBuildingForYear, _schools),
   getFetchingData,
   getLocation: getItemByIdWrapper(getLocation, _schools),
-  getMainBuilding: getItemByIdWrapper(getMainBuilding, _schools),
-  getMainBuildingInYear: getItemByIdWrapper(getMainBuildingInYear, _schools),
   getMainName: getItemByIdWrapper(getMainName, _schools),
   getSchoolDetails: getItemByIdWrapper(getSchoolDetails, _schools),
   getSchoolYearDetails: getItemByIdWrapper(getSchoolYearDetails, _schools),
@@ -68,25 +67,19 @@ function getBeginAndEndYear(school) {
   };
 }
 
+function getBuildingForYear(school, year) {
+  year = year || _getLatestYear(school);
+  return getItemForYear(school.buildings, year) || {};
+}
+
 function getLocation(school) {
-  const building = getMainBuilding(school);
+  const building = getBuildingForYear(school, null);
   return BuildingStore.getLocation(building.id);
 }
 
 
 function getFetchingData() {
   return _fetchingData;
-}
-
-function getMainBuilding(school) {
-  return _.first(school.buildings) || {};
-}
-
-function getMainBuildingInYear(school, year) {
-  if (!year) {
-    return getMainBuilding(school);
-  }
-  return getItemForYear(school.buildings, year) || {};
 }
 
 function getMainName(school) {
@@ -113,7 +106,7 @@ function getSchools(schoolIds) {
       return {};
     }
     let addresses = [];
-    const schoolBuilding = getMainBuilding(school);
+    const schoolBuilding = getBuildingForYear(school, null);
     const building = _getRelationanlObject(schoolBuilding, BuildingStore.getBuilding);
     if (building && building.addresses) {
       addresses = building.addresses;
@@ -132,8 +125,7 @@ function getSchools(schoolIds) {
 }
 
 function getSchoolYearDetails(school, year) {
-  year = year || new Date().getFullYear();
-
+  year = year || _getLatestYear(school);
   const schoolBuilding = getItemForYear(school.buildings, year);
   const building = schoolBuilding ? BuildingStore.getBuilding(schoolBuilding.id) : {};
   const schoolPrincipal = getItemForYear(school.principals, year);
@@ -149,6 +141,10 @@ function getSchoolYearDetails(school, year) {
 
 function hasSchool(schoolId) {
   return typeof _schools[schoolId] !== 'undefined';
+}
+
+function _getLatestYear(school) {
+  return getBeginAndEndYear(school).endYear || new Date().getFullYear();
 }
 
 function _getRelationalData(relationObjects, getter) {

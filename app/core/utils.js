@@ -31,8 +31,14 @@ function getItemByIdWrapper(func, items, defaultValue) {
 
 function getItemForYear(itemList, year) {
   return _.find(itemList, function(item) {
-    return item.begin_year <= year;
+    return inBetween(year, item.begin_year, item.end_year);
   });
+}
+
+function inBetween(year, beginYear, endYear) {
+  beginYear = beginYear || 0;
+  endYear = endYear || 10000;
+  return _.inRange(year, beginYear, endYear + 1);
 }
 
 function sortByYears(list) {
@@ -44,5 +50,6 @@ export default {
   getAddressString: getAddressString,
   getItemByIdWrapper: getItemByIdWrapper,
   getItemForYear: getItemForYear,
+  inBetween: inBetween,
   sortByYears: sortByYears
 };
