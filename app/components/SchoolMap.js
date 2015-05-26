@@ -7,19 +7,19 @@ import _ from 'lodash';
 
 class SchoolMap extends React.Component {
   getPosition() {
-    if (_.isEmpty(this.props.location)) {
+    const coordinates = this.props.location.coordinates;
+    if (_.isEmpty(coordinates)) {
       return null;
     }
-    const coordinates = this.props.location.coordinates;
     return [coordinates[1], coordinates[0]];
   }
 
-  render() {
+  renderMap() {
     const position = this.getPosition();
     const zoom = this.props.zoom || 14;
     const address = this.props.location.address || '';
-    return (
-      <Loader loaded={!_.isEmpty(position)} color='#FFF'>
+    if (!_.isEmpty(position)) {
+      return (
         <Map center={position} zoom={zoom}>
           <TileLayer
             url='http://{s}.tile.osm.org/{z}/{x}/{y}.png'
@@ -31,12 +31,28 @@ class SchoolMap extends React.Component {
             </Popup>
           </Marker>
         </Map>
+      );
+    } else {
+      return (
+        <div className='location-undefined-message'>
+          <i className='fa fa-map-marker'></i>
+          Sijaintia tälle vuodelle ei ole määritelty.
+        </div>
+      );
+    }
+  }
+
+  render() {
+    return (
+      <Loader loaded={!this.props.fetchingData} color='#FFF'>
+        {this.renderMap()}
       </Loader>
     );
   }
 }
 
 SchoolMap.propTypes = {
+  fetchingData: React.PropTypes.bool,
   location: React.PropTypes.shape({
     address: React.PropTypes.string,
     coordinates: React.PropTypes.array,

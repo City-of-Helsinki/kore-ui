@@ -4,7 +4,7 @@ import _ from 'lodash';
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
-import {getAddressString, getItemByIdWrapper, sortByYears} from '../core/utils';
+import {getAddressString, getItemByIdWrapper, inBetween, sortByYears} from '../core/utils';
 
 let _fetchingData = false;
 let _buildings = {};
@@ -12,7 +12,7 @@ let _buildings = {};
 const BuildingStore = Object.assign({}, BaseStore, {
   getFetchingData,
   getBuilding: getItemByIdWrapper(getBuilding, _buildings),
-  getLocation: getItemByIdWrapper(getLocation, _buildings)
+  getLocationForYear: getItemByIdWrapper(getLocationForYear, _buildings)
 });
 
 BuildingStore.dispatchToken = AppDispatcher.register(function(payload) {
@@ -49,9 +49,9 @@ function getBuilding(building) {
   return building;
 }
 
-function getLocation(building) {
+function getLocationForYear(building, year) {
   const address = _.find(building.addresses, function(current) {
-    return !_.isEmpty(current.location);
+    return inBetween(year, current.begin_year, current.end_year) && !_.isEmpty(current.location);
   }) || {};
   return _.assign({}, address.location, {address: getAddressString(address)});
 }
