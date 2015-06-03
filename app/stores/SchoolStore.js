@@ -13,6 +13,11 @@ import {
   getItemsForYear,
   sortByYears
 } from '../core/utils';
+import {
+  getAssociationData,
+  getAssociationObject,
+  parseAssociationData
+} from '../core/storeUtils';
 
 let _schools = {};
 let _fetchingData = false;
@@ -23,6 +28,7 @@ const SchoolStore = Object.assign({}, BaseStore, {
   getFetchingData,
   getLocationsForYear: getItemByIdWrapper(getLocationsForYear, _schools),
   getNameInSelectedYear: getItemByIdWrapper(getNameInSelectedYear, _schools),
+  getSchool: getItemByIdWrapper(getSchool, _schools),
   getSchoolDetails: getItemByIdWrapper(getSchoolDetails, _schools),
   getSchoolYearDetails: getItemByIdWrapper(getSchoolYearDetails, _schools),
   getSchoolsYearDetails,
@@ -93,16 +99,20 @@ function getNameInSelectedYear(school, year) {
   return getItemForYear(school.names, year) || {};
 }
 
+function getSchool(school) {
+  return school;
+}
+
 function getSchoolDetails(school, selectedYear) {
   selectedYear = selectedYear || _getLatestYear(school);
   return {
     archives: school.archives,
-    buildings: _getAssociationData(school.buildings, BuildingStore.getBuilding),
+    buildings: getAssociationData(school.buildings, BuildingStore.getBuilding),
     fields: school.fields,
     genders: school.genders,
     languages: school.languages,
     names: school.names,
-    principals: _getAssociationData(school.principals, PrincipalStore.getPrincipal),
+    principals: getAssociationData(school.principals, PrincipalStore.getPrincipal),
     selectedYear: selectedYear,
     types: school.types
   };
@@ -112,11 +122,11 @@ function getSchoolYearDetails(school, year) {
   year = year || _getLatestYear(school);
   const schoolBuilding = getItemForYear(school.buildings, year);
   const building = (
-    schoolBuilding ? _getAssociationObject(schoolBuilding, BuildingStore.getBuilding) : {}
+    schoolBuilding ? getAssociationObject(schoolBuilding, BuildingStore.getBuilding) : {}
   );
   const schoolPrincipal = getItemForYear(school.principals, year);
   const principal = (
-    schoolPrincipal ? _getAssociationObject(schoolPrincipal, PrincipalStore.getPrincipal) : {}
+    schoolPrincipal ? getAssociationObject(schoolPrincipal, PrincipalStore.getPrincipal) : {}
   );
   const address = getItemForYear(building.addresses, year);
   return {
@@ -147,48 +157,44 @@ function _getLatestYear(school) {
   return getBeginAndEndYear(school).endYear || new Date().getFullYear();
 }
 
-function _getAssociationData(associationObjects, getter) {
-  return _.map(associationObjects, function(associationObject) {
-    return _getAssociationObject(associationObject, getter);
-  });
-}
-
-function _getAssociationObject(associationObject, getter) {
-  let object = getter(associationObject.id);
-  return _.assign(object, associationObject);
-}
-
-function _parseAssociationData(associationObjects, associationIds, objectName) {
-  let associationObject;
-  return _.map(associationIds, function(id) {
-    associationObject = associationObjects[id];
-    associationObject.id = associationObject[objectName];
-    delete associationObject[objectName];
-    return associationObject;
-  });
-}
-
 function _receiveSchools(entities) {
   _.each(entities.schools, function(school) {
-    _schools[school.id] = {
-      archives: sortByYears(school.archives),
-      buildings: sortByYears(_parseAssociationData(
+    let _school = _schools[school.id];
+    if (!_school) {
+      _school = {
+        buildings: [],
+        principals: []
+      };
+    }
+    let associatedData = {};
+    if (school.buildings && school.buildings.length) {
+      associatedData.buildings = sortByYears(parseAssociationData(
         entities.schoolBuildings,
         school.buildings,
         'building'
-      )),
-      fields: sortByYears(school.fields),
-      genders: sortByYears(school.genders),
-      id: school.id,
-      languages: sortByYears(school.languages),
-      names: sortByYears(school.names),
-      principals: sortByYears(_parseAssociationData(
+      ));
+    }
+    if (school.principals && school.principals.length) {
+      associatedData.principals = sortByYears(parseAssociationData(
         entities.schoolPrincipals,
         school.principals,
         'principal'
-      )),
-      types: sortByYears(school.types)
-    };
+      ));
+    }
+    _.assign(
+      _school,
+      {
+        archives: sortByYears(school.archives),
+        fields: sortByYears(school.fields),
+        genders: sortByYears(school.genders),
+        id: school.id,
+        languages: sortByYears(school.languages),
+        names: sortByYears(school.names),
+        types: sortByYears(school.types)
+      },
+      associatedData
+    );
+    _schools[school.id] = _school;
   });
 }
 
