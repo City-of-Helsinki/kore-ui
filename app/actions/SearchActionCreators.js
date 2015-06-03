@@ -2,7 +2,6 @@
 
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
-import SchoolAPI from '../api/SchoolAPI';
 import SearchAPI from '../api/SearchAPI';
 import SearchStore from '../stores/SearchStore';
 
@@ -14,7 +13,9 @@ export default {
       query
     });
 
-    SchoolAPI.searchSchool(query, filters);
+    SearchAPI.searchSchool(query, filters);
+    SearchAPI.searchBuilding(query, filters);
+    SearchAPI.searchPrincipal(query, filters);
   },
 
   requestLoadMore(url) {
@@ -22,7 +23,7 @@ export default {
       type: ActionTypes.REQUEST_SEARCH_LOAD_MORE
     });
 
-    SchoolAPI.searchLoadMore(url);
+    SearchAPI.searchLoadMore(url);
   },
 
   selectSchool(school) {

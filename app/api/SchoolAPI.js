@@ -1,6 +1,5 @@
 'use strict';
 
-import {decamelizeKeys} from 'humps';
 import request from 'superagent';
 
 import SchoolServerActionCreators from '../actions/SchoolServerActionCreators';
@@ -24,23 +23,6 @@ export default {
           );
         } else {
           SchoolServerActionCreators.handleSchoolError(response.text);
-        }
-      });
-  },
-
-  searchSchool(query, filters) {
-    request
-      .get(buildAPIURL('school/'))
-      .query('search=' + query)
-      .query(decamelizeKeys(filters))
-      .query(API_ARGS)
-      .end(function(error, response) {
-        if (response.ok) {
-          SearchServerActionCreators.handleSearchSuccess(
-            normalizeSearchResponse(response.body)
-          );
-        } else {
-          SearchServerActionCreators.handleSearchError(response.text);
         }
       });
   },

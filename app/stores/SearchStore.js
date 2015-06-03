@@ -1,5 +1,7 @@
 'use strict';
 
+import _ from 'lodash';
+
 import ActionTypes from '../constants/ActionTypes';
 import {DEFAULT_LAYER} from '../constants/MapConstants';
 import AppDispatcher from '../core/AppDispatcher';
@@ -38,10 +40,15 @@ let _filtersOptionsRequested = {
   schoolField: false,
   language: false
 };
-let _nextPageUrl;
 let _searchQuery = '';
-let _searchResults = [];
 let _selectedMapYear = DEFAULT_LAYER.beginYear;
+const _searchResultsDefaults = {
+  buildings: null,
+  principals: null,
+  schools: null
+};
+let _searchResults = _resetSearchResults();
+let _nextPageUrl = _.clone(_searchResultsDefaults);
 let _selectedSchool;
 let _view = 'grid';
 let _years = [null, null];
@@ -68,8 +75,8 @@ SearchStore.dispatchToken = AppDispatcher.register(function(payload) {
 
     case ActionTypes.REQUEST_SEARCH:
       _fetchingData = true;
-      _nextPageUrl = null;
-      _searchResults = [];
+      _nextPageUrl = _.clone(_searchResultsDefaults);
+      _searchResults = _resetSearchResults();
       _searchQuery = action.query;
       _selectedSchool = null;
       SearchStore.emitChange();
@@ -78,7 +85,7 @@ SearchStore.dispatchToken = AppDispatcher.register(function(payload) {
     case ActionTypes.REQUEST_SEARCH_SUCCESS:
       AppDispatcher.waitFor([SchoolStore.dispatchToken]);
       _fetchingData = false;
-      _receiveSearchResponse(action.response.entities.searchResponse);
+      _receiveSearchResponse(action.response.entities.searchResponse, action.resultsContent);
       SearchStore.emitChange();
       break;
 
@@ -148,8 +155,10 @@ function getSearchQuery() {
   return _searchQuery;
 }
 
+// We need to get the different kind of results
+// but the view only support school search still
 function getSearchResults() {
-  return _searchResults;
+  return _searchResults.schools;
 }
 
 function getSelectedMapYear() {
@@ -161,7 +170,7 @@ function getSelectedSchool() {
 }
 
 function getSomethingWasSearched() {
-  return Boolean(_searchQuery || _searchResults.length || _fetchingData);
+  return Boolean(_searchQuery || _hasResults() || _fetchingData);
 }
 
 function getView() {
@@ -172,6 +181,10 @@ function getFilterOptionsRequested(filter) {
   return _filtersOptionsRequested[filter];
 }
 
+function getYears() {
+  return _years;
+}
+
 function _applyFilter(filterKey, optionId) {
   const optionsToFilter = {
     'schoolField': 'field',
@@ -180,20 +193,28 @@ function _applyFilter(filterKey, optionId) {
     'gender': 'gender'
   };
   _filters[optionsToFilter[filterKey]] = optionId;
-
 }
 
-function getYears() {
-  return _years;
+function _hasResults() {
+  const resultsLength = _.reduce(_searchResults, function(memo, resultsArray) {
+    return memo + resultsArray.length;
+  }, 0);
+  return Boolean(resultsLength);
 }
 
-function _receiveSearchResponse(searchResponse) {
-  _nextPageUrl = searchResponse.next;
-  _searchResults = _searchResults.concat(searchResponse.results);
+function _receiveSearchResponse(searchResponse, resultsContent) {
+  _nextPageUrl[resultsContent] = searchResponse.next;
+  _searchResults[resultsContent] = _searchResults[resultsContent].concat(searchResponse.results);
 }
 
 function _receiveFilterResponse(responseResults, resource) {
   _filtersOptions[resource] = responseResults;
+}
+
+function _resetSearchResults() {
+  return _.mapValues(_searchResultsDefaults, function() {
+    return [];
+  });
 }
 
 function _selectMapYear(year) {
