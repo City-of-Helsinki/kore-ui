@@ -18,12 +18,13 @@ export default {
     SearchAPI.searchPrincipal(query, filters);
   },
 
-  requestLoadMore(url) {
+  requestLoadMore(urls) {
     AppDispatcher.handleViewAction({
-      type: ActionTypes.REQUEST_SEARCH_LOAD_MORE
+      type: ActionTypes.REQUEST_SEARCH_LOAD_MORE,
+      urls
     });
 
-    SearchAPI.searchLoadMore(url);
+    SearchAPI.searchLoadMore(urls);
   },
 
   selectSchool(school) {

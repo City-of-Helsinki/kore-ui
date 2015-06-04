@@ -9,7 +9,7 @@ import {getMapYears} from '../core/mapUtils';
 import BaseStore from './BaseStore';
 import SchoolStore from './SchoolStore';
 
-let _fetchingData = false;
+let _fetchingData = 0;
 let _filters = {
   type: null,
   field: null,
@@ -48,7 +48,7 @@ const _searchResultsDefaults = {
   schools: null
 };
 let _searchResults = _resetSearchResults();
-let _nextPageUrl = _.clone(_searchResultsDefaults);
+let _nextPagesUrlDict = _.clone(_searchResultsDefaults);
 let _selectedSchool;
 let _view = 'grid';
 let _years = [null, null];
@@ -58,7 +58,7 @@ const SearchStore = Object.assign({}, BaseStore, {
   getFilters,
   getFiltersOptions,
   getFilterOptionsRequested,
-  getNextPageUrl,
+  getNextPagesUrlDict,
   getSearchQuery,
   getSearchResults,
   getSelectedMapYear,
@@ -74,8 +74,8 @@ SearchStore.dispatchToken = AppDispatcher.register(function(payload) {
   switch (action.type) {
 
     case ActionTypes.REQUEST_SEARCH:
-      _fetchingData = true;
-      _nextPageUrl = _.clone(_searchResultsDefaults);
+      _fetchingData += 3;
+      _nextPagesUrlDict = _.clone(_searchResultsDefaults);
       _searchResults = _resetSearchResults();
       _searchQuery = action.query;
       _selectedSchool = null;
@@ -84,14 +84,19 @@ SearchStore.dispatchToken = AppDispatcher.register(function(payload) {
 
     case ActionTypes.REQUEST_SEARCH_SUCCESS:
       AppDispatcher.waitFor([SchoolStore.dispatchToken]);
-      _fetchingData = false;
+      _fetchingData -= 1;
       _receiveSearchResponse(action.response.entities.searchResponse, action.resultsContent);
+      SearchStore.emitChange();
+      break;
+
+    case ActionTypes.REQUEST_SEARCH_ERROR:
+      _fetchingData -= 1;
       SearchStore.emitChange();
       break;
 
     case ActionTypes.REQUEST_SEARCH_LOAD_MORE:
       AppDispatcher.waitFor([SchoolStore.dispatchToken]);
-      _fetchingData = true;
+      _fetchingData += _.size(action.urls);
       SchoolStore.emitChange();
       break;
 
@@ -115,7 +120,6 @@ SearchStore.dispatchToken = AppDispatcher.register(function(payload) {
       break;
 
     case ActionTypes.REQUEST_SEARCH_FILTER_SUCCESS:
-      _fetchingData = false;
       _receiveFilterResponse(action.response.results, action.resource);
       SearchStore.emitChange();
       break;
@@ -136,7 +140,7 @@ SearchStore.dispatchToken = AppDispatcher.register(function(payload) {
 });
 
 function getFetchingData() {
-  return _fetchingData;
+  return Boolean(_fetchingData);
 }
 
 function getFilters() {
@@ -147,8 +151,8 @@ function getFiltersOptions() {
   return _filtersOptions;
 }
 
-function getNextPageUrl() {
-  return _nextPageUrl;
+function getNextPagesUrlDict() {
+  return _.pick(_nextPagesUrlDict, _.isString);
 }
 
 function getSearchQuery() {
@@ -170,7 +174,7 @@ function getSelectedSchool() {
 }
 
 function getSomethingWasSearched() {
-  return Boolean(_searchQuery || _hasResults() || _fetchingData);
+  return Boolean(_searchQuery || _hasResults() || getFetchingData());
 }
 
 function getView() {
@@ -203,7 +207,7 @@ function _hasResults() {
 }
 
 function _receiveSearchResponse(searchResponse, resultsContent) {
-  _nextPageUrl[resultsContent] = searchResponse.next;
+  _nextPagesUrlDict[resultsContent] = searchResponse.next;
   _searchResults[resultsContent] = _searchResults[resultsContent].concat(searchResponse.results);
 }
 

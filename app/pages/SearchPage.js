@@ -21,7 +21,7 @@ function getStateFromStores() {
     filters: SearchStore.getFilters(),
     filtersOptions: SearchStore.getFiltersOptions(),
     searchQuery: SearchStore.getSearchQuery(),
-    nextPageUrl: SearchStore.getNextPageUrl(),
+    nextPagesUrlDict: SearchStore.getNextPagesUrlDict(),
     selectedMapYear: SearchStore.getSelectedMapYear(),
     selectedSchool: SearchStore.getSelectedSchool(),
     schoolList: SchoolStore.getSchoolsYearDetails(searchResults),
@@ -50,7 +50,7 @@ class SearchPage extends React.Component {
   renderSearchResultsView() {
     const commonViewProps = {
       fetchingData: this.state.fetchingData,
-      nextPageUrl: this.state.nextPageUrl,
+      nextPagesUrlDict: this.state.nextPagesUrlDict,
       schoolList: this.state.schoolList,
       somethingWasSearched: this.state.somethingWasSearched
     };

@@ -1,5 +1,6 @@
 'use strict';
 
+import _ from 'lodash';
 import request from 'superagent';
 
 import SearchServerActionCreators from '../actions/SearchServerActionCreators';
@@ -29,6 +30,21 @@ function searchRequest(endPoint, query, filters, resultContent) {
     });
 }
 
+function searchLoadMore(url, resultContent) {
+  request
+    .get(url)
+    .end(function(error, response) {
+      if (response.ok) {
+        SearchServerActionCreators.handleSearchSuccess(
+          normalizeSearchResponse(response.body, resultContent),
+          resultContent
+        );
+      } else {
+        SearchServerActionCreators.handleSearchError(response.text);
+      }
+    });
+}
+
 export default {
   requestFilter(resource) {
     request
@@ -44,6 +60,10 @@ export default {
           SearchServerActionCreators.handleFilterError(response.text);
         }
       });
+  },
+
+  searchLoadMore(urls) {
+    _.each(urls, searchLoadMore);
   },
 
   searchBuilding(query, filters) {
