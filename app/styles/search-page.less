@@ -87,6 +87,26 @@
   }
   .search-results {
     margin-top: 30px;
+    .principalTableResult, .addressTableResult {
+      &:before {
+        content: '';
+        display: inline-block;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        margin: -8px 0;
+        width: 40px;
+        height: 32px;
+      }
+    }
+
+    .principalTableResult {
+      .info-row.details-principal();
+    }
+
+    .addressTableResult {
+      .info-row.details-building();
+    }
 
     .search-grid {
       .school-grid-row {
