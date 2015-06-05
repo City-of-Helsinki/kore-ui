@@ -7,6 +7,7 @@ import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
 import SchoolStore from './SchoolStore';
+import SchoolBuildingStore from './SchoolBuildingStore';
 import {
   getAddressString,
   getItemByIdWrapper,
@@ -69,8 +70,19 @@ function getSearchDetails(building, schoolId, query) {
       'streetNameSv'
     ]}
   );
+  const schoolBuilding = SchoolBuildingStore.getSchoolBuilding(schoolId + '-' + building.id);
   const addresses = addressSearchIndex.search(query);
-  return SchoolStore.getSchoolYearDetailsForNameInPeriod(schoolId, addresses);
+  const schoolBuildingAdddresses = addresses.map(function(address) {
+    let _address = _.clone(address);
+    if (_address.beginYear < schoolBuilding.beginYear) {
+      _address.beginYear = schoolBuilding.beginYear;
+    }
+    if (_address.endYear > schoolBuilding.endYear) {
+      _address.endYear = schoolBuilding.endYear;
+    }
+    return _address;
+  });
+  return SchoolStore.getSchoolYearDetailsForNameInPeriod(schoolId, schoolBuildingAdddresses);
 }
 
 function getLocationsForYear(buildingIds, year) {

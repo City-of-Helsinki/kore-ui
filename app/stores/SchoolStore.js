@@ -155,11 +155,11 @@ function getSchoolYearDetails(school, year) {
 function getNameYearsInPeriod(school, beginYear, endYear) {
   let years = [beginYear];
   _.each(school.names.reverse(), function(name) {
-    if (inBetween(name.beginYear, beginYear + 1, endYear)) {
+    if (inBetween(name.beginYear, beginYear + 1, endYear, true)) {
       years.push(name.beginYear);
     }
   });
-  return years;
+  return _.uniq(years);
 }
 
 function getSchoolYearDetailsForNameInPeriod(school, items) {

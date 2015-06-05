@@ -68,10 +68,11 @@ function getItemsForYear(itemList, year) {
   });
 }
 
-function inBetween(year, beginYear, endYear) {
+function inBetween(year, beginYear, endYear, closedEndYear) {
   beginYear = beginYear || 0;
   endYear = endYear || 10000;
-  return _.inRange(year, beginYear, endYear + 1);
+  const delta = closedEndYear ? null : 1;
+  return _.inRange(year, beginYear, endYear + delta);
 }
 
 function processBasicInfoRow(details, extended) {
