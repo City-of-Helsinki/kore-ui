@@ -4,14 +4,18 @@ import _ from 'lodash';
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
-import {getItemByIdWrapper} from '../core/utils';
+import SchoolStore from './SchoolStore';
+import {getItemByIdWrapper, sortByYears} from '../core/utils';
+import {getAssociationData, parseAssociationData} from '../core/storeUtils';
 
 let _fetchingData = false;
 let _principals = {};
 
 const PrincipalStore = Object.assign({}, BaseStore, {
   getFetchingData,
-  getPrincipal: getItemByIdWrapper(getPrincipal, _principals)
+  getPrincipal: getItemByIdWrapper(getPrincipal, _principals),
+  getPrincipalDetails: getItemByIdWrapper(getPrincipalDetails, _principals),
+  getSearchDetails: getItemByIdWrapper(getSearchDetails, _principals)
 });
 
 PrincipalStore.dispatchToken = AppDispatcher.register(function(payload) {
@@ -31,7 +35,7 @@ PrincipalStore.dispatchToken = AppDispatcher.register(function(payload) {
       break;
 
     case ActionTypes.REQUEST_SEARCH_SUCCESS:
-      _receivePrincipals(action.response.entities.principals);
+      _receivePrincipals(action.response.entities);
       PrincipalStore.emitChange();
       break;
 
@@ -48,15 +52,61 @@ function getPrincipal(principal) {
   return principal;
 }
 
-function _receivePrincipals(principals) {
-  _.each(principals, function(principal) {
-    _principals[principal.id] = {
-      employers: principal.employers,
-      firstName: principal.firstName,
-      id: principal.id,
-      name: principal.firstName + ' ' + principal.surname,
-      surname: principal.surname
-    };
+function getPrincipalDetails(principal) {
+  if (principal.employers) {
+    return _.assign(
+      {},
+      principal,
+      {schools: getAssociationData(
+        principal.employers,
+        SchoolStore.getSchoolDetails
+      )}
+    );
+  }
+  return principal;
+}
+
+
+function getSearchDetails(principal) {
+  return _.map(principal.employers, function(employer) {
+    const years = SchoolStore.getNameYearsInPeriod(
+      employer.id,
+      employer.beginYear,
+      employer.endYear
+    );
+    return _.map(years, function(year) {
+      return SchoolStore.getSchoolYearDetails(employer.id, year);
+    });
+  });
+}
+
+function _receivePrincipals(entities) {
+  _.each(entities.principals, function(principal) {
+    let _principal = _principals[principal.id];
+    if (!_principal) {
+      _principal = {
+        employers: []
+      };
+    }
+    let associatedData = {};
+    if (principal.employers && principal.employers.length) {
+      associatedData.employers = sortByYears(parseAssociationData(
+          entities.employer,
+          principal.employers,
+          'school'
+      ));
+    }
+    _.assign(
+      _principal,
+      {
+        firstName: principal.firstName,
+        id: principal.id,
+        name: principal.firstName + ' ' + principal.surname,
+        surname: principal.surname
+      },
+      associatedData
+    );
+    _principals[principal.id] = _principal;
   });
 }
 

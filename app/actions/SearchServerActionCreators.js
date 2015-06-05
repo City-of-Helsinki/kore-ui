@@ -4,10 +4,11 @@ import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 
 export default {
-  handleSearchSuccess(response) {
+  handleSearchSuccess(response, resultsContent) {
     AppDispatcher.handleServerAction({
       type: ActionTypes.REQUEST_SEARCH_SUCCESS,
-      response
+      response,
+      resultsContent
     });
   },
 

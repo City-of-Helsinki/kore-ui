@@ -15,6 +15,7 @@
     "extract-text-webpack-plugin": "^0.3.8",
     "file-loader": "^0.8.1",
     "flux": "^2.0.1",
+    "fuse.js": "^1.2.2",
     "html-webpack-plugin": "^1.4.0",
     "humps": "^0.5.2",
     "leaflet": "^0.7.3",
@@ -27,12 +28,12 @@
     "react-document-title": "^1.0.2",
     "react-loader": "^1.2.0",
     "react-router": "^0.13.3",
+    "react-select": "~0.4.9",
     "react-slider": "~0.4.2",
     "style-loader": "^0.10.1",
     "superagent": "~1.2.0",
     "url-loader": "^0.5.5",
-    "webpack": "^1.8.5",
-    "react-select": "~0.4.9"
+    "webpack": "^1.8.5"
   },
   "devDependencies": {
     "babel-eslint": "^3.1.2",

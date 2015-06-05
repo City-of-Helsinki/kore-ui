@@ -12,7 +12,7 @@ class SearchLoadMore extends React.Component {
   }
 
   handleClick() {
-    SearchActionCreators.requestLoadMore(this.props.url);
+    SearchActionCreators.requestLoadMore(this.props.urls);
   }
 
   render() {
@@ -30,7 +30,7 @@ class SearchLoadMore extends React.Component {
 
 SearchLoadMore.propTypes = {
   fetchingData: React.PropTypes.bool,
-  url: React.PropTypes.string.isRequired
+  urls: React.PropTypes.objectOf(React.PropTypes.string).isRequired
 };
 
 export default SearchLoadMore;

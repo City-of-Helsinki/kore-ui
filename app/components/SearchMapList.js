@@ -1,5 +1,6 @@
 'use strict';
 
+import _ from 'lodash';
 import React from 'react';
 import Loader from 'react-loader';
 
@@ -37,11 +38,11 @@ class SearchMapList extends React.Component {
   render() {
     const loading = this.props.fetchingData && (this.props.schoolList.length === 0);
     let loadMore;
-    if (this.props.nextPageUrl) {
+    if (!_.isEmpty(this.props.nextPagesUrlDict)) {
       loadMore = (
         <SearchLoadMore
           fetchingData={this.props.fetchingData}
-          url={this.props.nextPageUrl}
+          urls={this.props.nextPagesUrlDict}
         />
       );
     }
@@ -59,7 +60,7 @@ class SearchMapList extends React.Component {
 
 SearchMapList.propTypes = {
   fetchingData: React.PropTypes.bool,
-  nextPageUrl: React.PropTypes.string,
+  nextPagesUrlDict: React.PropTypes.objectOf(React.PropTypes.string),
   schoolList: React.PropTypes.array.isRequired,
   selectedSchool: React.PropTypes.number,
   somethingWasSearched: React.PropTypes.bool.isRequired

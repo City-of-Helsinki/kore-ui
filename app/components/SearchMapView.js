@@ -36,7 +36,7 @@ class SearchMapView extends React.Component {
         <div className='search-map-list-container'>
           <SearchMapList
             fetchingData={this.props.fetchingData}
-            nextPageUrl={this.props.nextPageUrl}
+            nextPagesUrlDict={this.props.nextPagesUrlDict}
             schoolList={schoolsWithLocation}
             selectedSchool={this.props.selectedSchool}
             somethingWasSearched={this.props.somethingWasSearched}
@@ -57,7 +57,7 @@ SearchMapView.propTypes = {
     language: filterPropType,
     gender: filterPropType
   }),
-  nextPageUrl: React.PropTypes.string,
+  nextPagesUrlDict: React.PropTypes.objectOf(React.PropTypes.string),
   schoolList: React.PropTypes.array.isRequired,
   searchQuery: React.PropTypes.string.isRequired,
   selectedMapYear: React.PropTypes.number,
