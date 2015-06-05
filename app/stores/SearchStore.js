@@ -50,7 +50,7 @@ const _searchResultsDefaults = {
 let _searchResults = _resetSearchResults();
 let _nextPagesUrlDict = _.clone(_searchResultsDefaults);
 let _selectedSchool;
-let _view = 'grid';
+let _view = 'table';
 let _years = [null, null];
 
 const SearchStore = Object.assign({}, BaseStore, {
@@ -159,10 +159,8 @@ function getSearchQuery() {
   return _searchQuery;
 }
 
-// We need to get the different kind of results
-// but the view only support school search still
 function getSearchResults() {
-  return _searchResults.schools;
+  return _searchResults;
 }
 
 function getSelectedMapYear() {

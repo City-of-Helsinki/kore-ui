@@ -10,11 +10,14 @@ import SearchGridView from '../components/SearchGridView';
 import SearchMapView from '../components/SearchMapView';
 import SearchTableView from '../components/SearchTableView';
 import SearchTimeline from '../components/SearchTimeline';
+import BuildingStore from '../stores/BuildingStore';
+import PrincipalStore from '../stores/PrincipalStore';
 import SchoolStore from '../stores/SchoolStore';
 import SearchStore from '../stores/SearchStore';
 
 function getStateFromStores() {
   const searchResults = SearchStore.getSearchResults();
+  const searchQuery = SearchStore.getSearchQuery();
   return {
     view: SearchStore.getView(),
     fetchingData: SearchStore.getFetchingData(),
@@ -24,7 +27,14 @@ function getStateFromStores() {
     nextPagesUrlDict: SearchStore.getNextPagesUrlDict(),
     selectedMapYear: SearchStore.getSelectedMapYear(),
     selectedSchool: SearchStore.getSelectedSchool(),
-    schoolList: SchoolStore.getSchoolsYearDetails(searchResults),
+    schoolList: searchResults.schools.map(function(schoolId) {
+      return SchoolStore.getSearchDetails(schoolId, searchQuery);
+    }),
+    principalList: searchResults.principals.map(PrincipalStore.getSearchDetails),
+    schoolBuildingList: searchResults.buildings.map(function(schoolBuilding) {
+      const [schoolId, buildingId] = schoolBuilding.split('-');
+      return BuildingStore.getSearchDetails(buildingId, schoolId, searchQuery);
+    }),
     somethingWasSearched: SearchStore.getSomethingWasSearched(),
     years: SearchStore.getYears()
   };
@@ -51,6 +61,8 @@ class SearchPage extends React.Component {
     const commonViewProps = {
       fetchingData: this.state.fetchingData,
       nextPagesUrlDict: this.state.nextPagesUrlDict,
+      principalList: this.state.principalList,
+      schoolBuildingList: this.state.schoolBuildingList,
       schoolList: this.state.schoolList,
       somethingWasSearched: this.state.somethingWasSearched
     };

@@ -1,17 +1,19 @@
 'use strict';
 
 import _ from 'lodash';
+import Fuse from 'fuse.js';
+
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
 import BuildingStore from './BuildingStore';
 import PrincipalStore from './PrincipalStore';
 import {
-  inBetween,
   getAddressString,
   getItemByIdWrapper,
   getItemForYear,
   getItemsForYear,
+  inBetween,
   sortByYears
 } from '../core/utils';
 import {
@@ -29,11 +31,16 @@ const SchoolStore = Object.assign({}, BaseStore, {
   getFetchingData,
   getLocationsForYear: getItemByIdWrapper(getLocationsForYear, _schools),
   getNameInSelectedYear: getItemByIdWrapper(getNameInSelectedYear, _schools),
+  getNameYearsInPeriod: getItemByIdWrapper(getNameYearsInPeriod, _schools, []),
   getSchool: getItemByIdWrapper(getSchool, _schools),
   getSchoolDetails: getItemByIdWrapper(getSchoolDetails, _schools),
-  getNameYearsInPeriod: getItemByIdWrapper(getNameYearsInPeriod, _schools, []),
-  getSchoolYearDetails: getItemByIdWrapper(getSchoolYearDetails, _schools),
   getSchoolsYearDetails,
+  getSchoolYearDetails: getItemByIdWrapper(getSchoolYearDetails, _schools),
+  getSearchDetails: getItemByIdWrapper(getSearchDetails, _schools),
+  getSchoolYearDetailsForNameInPeriod: getItemByIdWrapper(
+    getSchoolYearDetailsForNameInPeriod,
+    _schools
+  ),
   hasSchool
 });
 
@@ -153,6 +160,28 @@ function getNameYearsInPeriod(school, beginYear, endYear) {
     }
   });
   return years;
+}
+
+function getSchoolYearDetailsForNameInPeriod(school, items) {
+  return _.map(items, function(item) {
+    const years = getNameYearsInPeriod(
+      school,
+      item.beginYear,
+      item.endYear
+    );
+    return _.map(years, function(year) {
+      return getSchoolYearDetails(school, year);
+    });
+  });
+}
+
+function getSearchDetails(school, query) {
+  let nameSearchIndex = new Fuse(
+    school.names,
+    {keys: ['officialName', 'otherNames']}
+  );
+  const names = nameSearchIndex.search(query);
+  return getSchoolYearDetailsForNameInPeriod(school, names);
 }
 
 function getSchoolsYearDetails(schoolIds, year) {

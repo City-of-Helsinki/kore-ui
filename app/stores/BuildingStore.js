@@ -1,18 +1,28 @@
 'use strict';
 
 import _ from 'lodash';
+import Fuse from 'fuse.js';
+
 import AppDispatcher from '../core/AppDispatcher';
 import ActionTypes from '../constants/ActionTypes';
 import BaseStore from './BaseStore';
-import {getAddressString, getItemByIdWrapper, inBetween, sortByYears} from '../core/utils';
+import SchoolStore from './SchoolStore';
+import {
+  getAddressString,
+  getItemByIdWrapper,
+  inBetween,
+  sortByYears
+} from '../core/utils';
 
 let _fetchingData = false;
 let _buildings = {};
 
+
 const BuildingStore = Object.assign({}, BaseStore, {
-  getFetchingData,
   getBuilding: getItemByIdWrapper(getBuilding, _buildings),
-  getLocationsForYear
+  getFetchingData,
+  getLocationsForYear,
+  getSearchDetails: getItemByIdWrapper(getSearchDetails, _buildings)
 });
 
 BuildingStore.dispatchToken = AppDispatcher.register(function(payload) {
@@ -47,6 +57,20 @@ function getFetchingData() {
 
 function getBuilding(building) {
   return building;
+}
+
+function getSearchDetails(building, schoolId, query) {
+  let addressSearchIndex = new Fuse(
+    building.addresses,
+    {keys: [
+      'municipalityFi',
+      'municipalitySv',
+      'streetNameFi',
+      'streetNameSv'
+    ]}
+  );
+  const addresses = addressSearchIndex.search(query);
+  return SchoolStore.getSchoolYearDetailsForNameInPeriod(schoolId, addresses);
 }
 
 function getLocationsForYear(buildingIds, year) {

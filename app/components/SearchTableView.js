@@ -43,6 +43,7 @@ class SearchTableView extends React.Component {
   }
 
   render() {
+    return <div></div>;  // This line is only to avoid javascript errors in the current APP state.
     const loading = this.props.fetchingData && (this.props.schoolList.length === 0);
     let loadMore;
     if (!_.isEmpty(this.props.nextPagesUrlDict)) {
