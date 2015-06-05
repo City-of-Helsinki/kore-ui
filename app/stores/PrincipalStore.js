@@ -14,7 +14,8 @@ let _principals = {};
 const PrincipalStore = Object.assign({}, BaseStore, {
   getFetchingData,
   getPrincipal: getItemByIdWrapper(getPrincipal, _principals),
-  getPrincipalDetails: getItemByIdWrapper(getPrincipalDetails, _principals)
+  getPrincipalDetails: getItemByIdWrapper(getPrincipalDetails, _principals),
+  getSearchDetails: getItemByIdWrapper(getSearchDetails, _principals)
 });
 
 PrincipalStore.dispatchToken = AppDispatcher.register(function(payload) {
@@ -63,6 +64,20 @@ function getPrincipalDetails(principal) {
     );
   }
   return principal;
+}
+
+
+function getSearchDetails(principal) {
+  return _.map(principal.employers, function(employer) {
+    const years = SchoolStore.getNameYearsInPeriod(
+      employer.id,
+      employer.beginYear,
+      employer.endYear
+    );
+    return _.map(years, function(year) {
+      return SchoolStore.getSchoolYearDetails(employer.id, year);
+    });
+  });
 }
 
 function _receivePrincipals(entities) {

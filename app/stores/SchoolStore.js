@@ -7,6 +7,7 @@ import BaseStore from './BaseStore';
 import BuildingStore from './BuildingStore';
 import PrincipalStore from './PrincipalStore';
 import {
+  inBetween,
   getAddressString,
   getItemByIdWrapper,
   getItemForYear,
@@ -30,6 +31,7 @@ const SchoolStore = Object.assign({}, BaseStore, {
   getNameInSelectedYear: getItemByIdWrapper(getNameInSelectedYear, _schools),
   getSchool: getItemByIdWrapper(getSchool, _schools),
   getSchoolDetails: getItemByIdWrapper(getSchoolDetails, _schools),
+  getNameYearsInPeriod: getItemByIdWrapper(getNameYearsInPeriod, _schools, []),
   getSchoolYearDetails: getItemByIdWrapper(getSchoolYearDetails, _schools),
   getSchoolsYearDetails,
   hasSchool
@@ -141,6 +143,16 @@ function getSchoolYearDetails(school, year) {
     principal: principal,
     type: getItemForYear(school.types, year) || {}
   };
+}
+
+function getNameYearsInPeriod(school, beginYear, endYear) {
+  let years = [beginYear];
+  _.each(school.names.reverse(), function(name) {
+    if (inBetween(name.beginYear, beginYear + 1, endYear)) {
+      years.push(name.beginYear);
+    }
+  });
+  return years;
 }
 
 function getSchoolsYearDetails(schoolIds, year) {
