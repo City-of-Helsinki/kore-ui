@@ -22,6 +22,7 @@ function getStateFromStores() {
     fetchingData: SearchStore.getFetchingData(),
     filters: SearchStore.getFilters(),
     filtersOptions: SearchStore.getFiltersOptions(),
+    infoText: SearchStore.getInfoText(),
     nameResults: SchoolStore.getSearchDetails(searchResults.schools, searchQuery),
     nextPagesUrlDict: SearchStore.getNextPagesUrlDict(),
     principalResults: EmployershipStore.getSearchDetails(searchResults.employerships),
@@ -58,6 +59,7 @@ class SearchPage extends React.Component {
 
     const searchViewProps = {
       fetchingData: this.state.fetchingData,
+      infoText: this.state.infoText,
       nextPagesUrlDict: this.state.nextPagesUrlDict,
       schoolList: schoolList,
       somethingWasSearched: this.state.somethingWasSearched

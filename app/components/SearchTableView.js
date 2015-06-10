@@ -64,6 +64,7 @@ class SearchTableView extends React.Component {
   render() {
     const loading = this.props.fetchingData && (this.props.schoolList.length === 0);
     let loadMore;
+    let infoText;
     if (!_.isEmpty(this.props.nextPagesUrlDict)) {
       loadMore = (
         <SearchLoadMore
@@ -72,9 +73,13 @@ class SearchTableView extends React.Component {
         />
       );
     }
+    if (this.props.infoText) {
+      infoText = <p>{this.props.infoText}</p>;
+    }
     if (this.props.somethingWasSearched) {
       return (
         <Loader loaded={!loading}>
+          {infoText}
           {this.renderSearchResults()}
           {loadMore}
         </Loader>
@@ -86,6 +91,7 @@ class SearchTableView extends React.Component {
 
 SearchTableView.propTypes = {
   fetchingData: React.PropTypes.bool,
+  infoText: React.PropTypes.string,
   nextPagesUrlDict: React.PropTypes.objectOf(React.PropTypes.string),
   schoolList: React.PropTypes.array.isRequired,
   somethingWasSearched: React.PropTypes.bool.isRequired

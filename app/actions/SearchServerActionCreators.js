@@ -16,7 +16,8 @@ export default {
     console.log(error);
 
     AppDispatcher.handleServerAction({
-      type: ActionTypes.REQUEST_SEARCH_ERROR
+      type: ActionTypes.REQUEST_SEARCH_ERROR,
+      error: error
     });
   },
 

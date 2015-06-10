@@ -41,6 +41,7 @@ let _filtersOptionsRequested = {
   schoolField: false,
   language: false
 };
+let _infoText = null;
 let _searchQuery = '';
 let _selectedMapYear = String(DEFAULT_LAYER.beginYear);
 const _searchResultsDefaults = {
@@ -60,6 +61,7 @@ const SearchStore = Object.assign({}, BaseStore, {
   getFilters,
   getFiltersOptions,
   getFilterOptionsRequested,
+  getInfoText,
   getNextPagesUrlDict,
   getSearchQuery,
   getSearchResults,
@@ -78,6 +80,7 @@ SearchStore.dispatchToken = AppDispatcher.register(function(payload) {
     case ActionTypes.REQUEST_SEARCH:
       _actualSearchYears = _years;
       _fetchingData += 3;
+      _infoText = null;
       _nextPagesUrlDict = _.clone(_searchResultsDefaults);
       _searchResults = _resetSearchResults();
       _searchQuery = action.query;
@@ -94,6 +97,7 @@ SearchStore.dispatchToken = AppDispatcher.register(function(payload) {
 
     case ActionTypes.REQUEST_SEARCH_ERROR:
       _fetchingData -= 1;
+      _handleErrorMessage(action.error);
       SearchStore.emitChange();
       break;
 
@@ -158,6 +162,10 @@ function getFiltersOptions() {
   return _filtersOptions;
 }
 
+function getInfoText() {
+  return _infoText;
+}
+
 function getNextPagesUrlDict() {
   return _.pick(_nextPagesUrlDict, _.isString);
 }
@@ -202,6 +210,15 @@ function _applyFilter(filterKey, optionId) {
     'gender': 'gender'
   };
   _filters[optionsToFilter[filterKey]] = optionId;
+}
+
+function _handleErrorMessage(message) {
+  if (_.includes(message, 'enter at least')) {
+    _infoText = `
+      Jos haluat nähdä myös rehtoreihin osuneita hakutuloksia,
+      syötä vähintää neljä merkkiä hakukenttään.
+    `;
+  }
 }
 
 function _hasResults() {
