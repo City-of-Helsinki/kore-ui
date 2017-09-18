@@ -23,7 +23,7 @@ function processInfoRow(details) {
     },
     {
       key: 'timeline-building-info',
-      className: 'details-building',
+      className: 'details-location',
       name: details.buildingString
     },
     {

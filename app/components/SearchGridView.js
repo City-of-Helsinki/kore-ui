@@ -35,7 +35,7 @@ function processGridInfoRow(details) {
   if (details.type === 'building') {
     items.push({
       key: 'building-' + details.id,
-      className: 'details-building',
+      className: 'details-location',
       name: details.extraInfo
     });
   }
