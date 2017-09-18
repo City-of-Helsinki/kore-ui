@@ -7,7 +7,7 @@ module.exports = function(options) {
   var karmaConfig = {
     frameworks: ['mocha', 'chai'],
 
-    browsers: ['Chrome'],
+    browsers: ['ChromeHeadless'],
 
     // Running tests with coverage migth take some time
     browserNoActivityTimeout: 60000,
