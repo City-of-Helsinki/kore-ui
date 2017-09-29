@@ -32,7 +32,7 @@
     "react-select": "git+https://git@github.com/YoYuUm/react-select.git#build",
     "react-slider": "~0.4.2",
     "style-loader": "^0.10.1",
-    "superagent": "~1.2.0",
+    "superagent": "~2.0.0",
     "url-loader": "^0.5.5",
     "webpack": "^1.8.5"
   },
