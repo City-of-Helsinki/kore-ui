@@ -9,7 +9,7 @@
     "babel-core": "^5.1.10",
     "babel-loader": "^5.0.0",
     "babel-runtime": "^5.1.10",
-    "codecov": "^2.3.0",
+    "codecov": "^3.0.0",
     "css-loader": "^0.10.1",
     "eslint-loader": "^1.9.0",
     "express": "^4.12.3",
@@ -32,7 +32,7 @@
     "react-select": "git+https://git@github.com/YoYuUm/react-select.git#build",
     "react-slider": "~0.4.2",
     "style-loader": "^0.10.1",
-    "superagent": "~1.2.0",
+    "superagent": "~3.7.0",
     "url-loader": "^0.5.5",
     "webpack": "^1.8.5"
   },
