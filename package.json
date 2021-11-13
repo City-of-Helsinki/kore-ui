@@ -17,7 +17,7 @@
     "file-loader": "^0.8.1",
     "flux": "^2.0.1",
     "fuse.js": "^1.2.2",
-    "html-webpack-plugin": "^1.4.0",
+    "html-webpack-plugin": "^4.0.0",
     "humps": "^0.5.2",
     "leaflet": "^0.7.3",
     "less": "^2.5.0",
@@ -34,7 +34,7 @@
     "style-loader": "^0.10.1",
     "superagent": "~1.2.0",
     "url-loader": "^0.5.5",
-    "webpack": "^1.8.5"
+    "webpack": "^3.0.0"
   },
   "devDependencies": {
     "chai": "^2.3.0",
